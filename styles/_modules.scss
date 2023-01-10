@@ -1256,6 +1256,21 @@
         }
       }
     }
+    &__message {
+      &-error {
+        background-color: var(--theme_danger);
+        padding: 0.7rem;
+        border: 1px solid var(--theme_danger);
+        border-radius: 4px;
+        color: #fff;
+      }
+      &-success {
+        background-color: #e6f8f6;
+        padding: 0.7rem;
+        border: 1px solid #6dc7bd;
+        border-radius: 4px;
+      }
+    }
   }
   &__auth-box {
     &__logo-wrapper {

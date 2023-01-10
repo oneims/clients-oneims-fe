@@ -1,8 +1,79 @@
-import React from "react";
-import Button from "@/components/core/Button";
+import React, { useState, useEffect } from "react";
+import Form from "@/components/core/Form";
 import Section from "@/components/layouts/Section";
+import { useForm } from "react-hook-form";
+import { Schema__Form__CreateAccount } from "@/lib/Schema";
+import axios from "axios";
+import { setCookie } from "nookies";
+import { sleeper } from "@/lib/Helpers";
 
-const Login = () => {
+const CreateAccount = () => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isDirty, isValid },
+  } = useForm({
+    mode: `all`,
+  });
+
+  const [newUser, setNewUser] = useState({
+    response: null,
+    isLoading: false,
+    isError: null,
+  });
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  const onSubmit = (data) => {
+    setNewUser((prevState) => ({ ...prevState, isLoading: true }));
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    const payload = {
+      username: `${data.company}__${data.email}`,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      company: data.company,
+      email: data.email,
+      password: data.password,
+    };
+    const postPayload = async () => {
+      await axios
+        .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/local/register`, payload)
+        .then(sleeper(500))
+        .then((res) => {
+          console.log(res);
+          const jwt = res.data.jwt;
+          const id = res.data.user.id;
+          setNewUser((prevState) => ({
+            ...prevState,
+            response: res.data.data,
+            isLoading: false,
+          }));
+          setCookie({ res }, "token", jwt, {
+            secure: process.env.NODE_ENV !== "development",
+            maxAge: 60 * 60 * 24 * 7,
+            path: "/",
+          });
+          setCookie({ res }, "id", id, {
+            secure: process.env.NODE_ENV !== "development",
+            maxAge: 60 * 60 * 24 * 7,
+            path: "/",
+          });
+          location.replace("/onboardings");
+          reset();
+        })
+        .catch((err) => {
+          console.log(err);
+          if (err.response) {
+            setErrorMessage(err.response.data.error.message);
+          }
+          setNewUser((prevState) => ({ ...prevState, isError: true, isLoading: false }));
+        });
+    };
+    postPayload();
+  };
+
   return (
     <>
       <main>
@@ -24,38 +95,17 @@ const Login = () => {
                   </div>
                 </div>
                 <div className="MODULE__auth-box__form-wrapper">
-                  <form className="MODULE__form">
-                    <div class="MODULE__form__grouped-fields MODULE__form__grouped-fields-two-col">
-                      <div class="MODULE__form__field">
-                        <label for="firstName">First Name</label>
-                        <input type="text" tabindex="1" aria-labelledby="firstName" />
-                      </div>
-                      <div class="MODULE__form__field">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" tabindex="1" aria-labelledby="lastName" />
-                      </div>
-                    </div>
-                    <div class="MODULE__form__field">
-                      <label for="company">Company</label>
-                      <input type="text" tabindex="1" aria-labelledby="company" />
-                    </div>
-                    <div class="MODULE__form__field">
-                      <label for="email">Email address</label>
-                      <input type="email" tabindex="1" aria-labelledby="email" />
-                    </div>
-                    <div class="MODULE__form__field">
-                      <label for="password">Password</label>
-                      <input type="password" tabindex="1" aria-labelledby="password" />
-                    </div>
-                    <Button
-                      wrapperClassName="mt-4 pt-3"
-                      type="submit"
-                      className="w-100"
-                      variant="primary"
-                    >
-                      Sign up
-                    </Button>
-                  </form>
+                  <Form
+                    onSubmit={handleSubmit(onSubmit)}
+                    register={register}
+                    schema={Schema__Form__CreateAccount}
+                    errors={errors}
+                    isDirty={isDirty}
+                    isValid={isValid}
+                    isLoading={newUser.isLoading}
+                    errorMessage={errorMessage}
+                    successMessage={successMessage}
+                  />
                 </div>
               </div>
             </div>
@@ -71,4 +121,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default CreateAccount;

@@ -10,12 +10,12 @@ const Button = ({
   type,
   destination,
   pageRefresh,
-  loading,
+  isLoading,
 }) => {
   return (
     <>
       {destination ? (
-        <div class={`MODULE__button ${wrapperClassName}`}>
+        <div className={`MODULE__button ${wrapperClassName}`}>
           {pageRefresh ? (
             <a href={destination}>
               <button type={type} className={`THEME__button THEME__button-${variant} ${className}`}>
@@ -31,16 +31,16 @@ const Button = ({
           )}
         </div>
       ) : (
-        <div class={`MODULE__button ${wrapperClassName}`}>
+        <div className={`MODULE__button ${wrapperClassName}`}>
           <button
             type={type}
             className={`THEME__button THEME__button-${variant} ${className} ${
-              loading &&
+              isLoading &&
               "THEME__opacity-70 pointer-events-none d-flex align-items-center justify-content-center"
             }`}
           >
             {children}
-            {loading && <Spinner button white={variant !== `transparent`} />}
+            {isLoading && <Spinner button white={variant !== `transparent`} />}
           </button>
         </div>
       )}

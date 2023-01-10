@@ -376,5 +376,11 @@
   &__bg-app-light {
     background-color: var(--theme_app-bg-light);
   }
+  &__text-danger {
+    color: var(--theme_danger);
+  }
+  &__text-success {
+    color: var(--theme_success);
+  }
   // New Theme items here
 }

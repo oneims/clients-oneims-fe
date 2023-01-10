@@ -1,7 +1,7 @@
 import React from "react";
 import Container from "@/components/layouts/Container";
 
-const Header = () => {
+const Header = ({ firstName, lastName, isLoggedIn }) => {
   return (
     <>
       <header className="BLOCK__app-header py-3 THEME__bg-app-dark">
@@ -15,12 +15,16 @@ const Header = () => {
                 />
               </a>
             </div>
-            <div className="BLOCK__app-header__info-wrapper">
-              <div className="THEME__text-inverted THEME__font-size-0n9">
-                <span className="THEME__f-600">Signed in as John Doe</span>
-                <span className="">&nbsp;&nbsp;|&nbsp;&nbsp;Log out</span>
+            {isLoggedIn && (
+              <div className="BLOCK__app-header__info-wrapper">
+                <div className="THEME__text-inverted THEME__font-size-0n9">
+                  <span className="THEME__f-600">
+                    Signed in as {firstName} {lastName}
+                  </span>
+                  <span className="">&nbsp;&nbsp;|&nbsp;&nbsp;Log out</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </Container>
       </header>

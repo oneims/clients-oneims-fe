@@ -1,14 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "@/components/blocks/Header";
 import Main from "@/components/layouts/Main";
 import Footer from "@/components/blocks/Footer";
 import Section from "@/components/layouts/Section";
 import Container from "@/components/layouts/Container";
+import { useAppContext } from "@/context/AppWrapper";
 
 const OnboardingsIndex = () => {
+  const { handlers, user } = useAppContext();
+  useEffect(() => {
+    handlers.checkLogin();
+  }, []);
   return (
     <>
-      <Header />
+      <Header isLoggedIn={user?.isLoggedIn} firstName={user?.firstName} lastName={user?.lastName} />
       <Main style={{ minHeight: "100vh" }}>
         <Section className="THEME__bg-primary BLOCK__default">
           <Container>
