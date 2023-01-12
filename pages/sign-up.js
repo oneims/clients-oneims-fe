@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Form from "@/components/core/Form";
-import Section from "@/components/layouts/Section";
+import Section from "@/components/wrappers/Section";
 import { useForm } from "react-hook-form";
-import { Schema__Form__CreateAccount } from "@/lib/Schema";
+import { Schema__Form__CreateAccount, Schema__Generic_Variables } from "@/lib/Schema";
 import axios from "axios";
 import { setCookie } from "nookies";
 import { sleeper } from "@/lib/Helpers";
@@ -60,7 +60,7 @@ const CreateAccount = () => {
             maxAge: 60 * 60 * 24 * 7,
             path: "/",
           });
-          location.replace("/onboardings");
+          location.replace(`${Schema__Generic_Variables.loginSuccessUrl}`);
           reset();
         })
         .catch((err) => {

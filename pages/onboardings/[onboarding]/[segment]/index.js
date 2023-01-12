@@ -1,18 +1,21 @@
 import React from "react";
 import Header from "@/components/blocks/Header";
-import Main from "@/components/layouts/Main";
+import Main from "@/components/wrappers/Main";
 import Button from "@/components/core/Button";
 import Footer from "@/components/blocks/Footer";
-import Section from "@/components/layouts/Section";
-import Container from "@/components/layouts/Container";
+import Section from "@/components/wrappers/Section";
+import Container from "@/components/wrappers/Container";
 import parse from "html-react-parser";
+import { useAppContext } from "@/context/AppWrapper";
+import ProtectedRoute from "@/lib/ProtectedRoute";
+import Dashboard from "@/components/wrappers/Dashboard";
 
 const Segment = () => {
+  const { user } = useAppContext();
   return (
     <>
-      <div className="BLOCK__segment-layout">
-        <Header />
-        <Main>
+      <ProtectedRoute>
+        <Dashboard segmentView>
           <Section className="py-3 THEME__border-bottom-light">
             <Container fluid>
               <div className="text-start">
@@ -167,8 +170,8 @@ const Segment = () => {
               </div>
             </div>
           </Section>
-        </Main>
-      </div>
+        </Dashboard>
+      </ProtectedRoute>
     </>
   );
 };

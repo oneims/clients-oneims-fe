@@ -382,5 +382,8 @@
   &__text-success {
     color: var(--theme_success);
   }
+  &__cursor-pointer {
+    cursor: pointer;
+  }
   // New Theme items here
 }

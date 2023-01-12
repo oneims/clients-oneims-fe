@@ -13,7 +13,7 @@ export function AppWrapper({ children }) {
 
   const handlers = {
     // Global Handlers Here
-    checkLogin: async () => {
+    checkAuth: async () => {
       let token;
       const cookies = parseCookies();
       const params = ``;
