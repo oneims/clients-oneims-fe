@@ -385,5 +385,12 @@
   &__cursor-pointer {
     cursor: pointer;
   }
+  &__generic-spinner-wrapper {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
   // New Theme items here
 }

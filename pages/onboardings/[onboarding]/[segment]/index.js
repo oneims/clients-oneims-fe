@@ -111,7 +111,7 @@ const Segment = () => {
                 <div className="THEME__mw-700 mx-auto BLOCK__medium px-4">
                   <div className="BLOCK__segment-view__body pb-md-5">
                     <div className="MODULE__article-content MODULE__article-content-smaller-headings">
-                      <h2>Lesson overview</h2>
+                      {parse(`<h2>Lesson overview</h2>
                       <p>
                         If you ask different organizations to define lead management, you'll likely
                         hear varying definitions. Lead management will vary depending on how they
@@ -136,7 +136,7 @@ const Segment = () => {
                         qualification. Whether you're in marketing or sales, HubSpot has the tools
                         to make segmenting and qualifying your leads feel seamless. In this lesson,
                         you'll learn how to segment and qualify your leads with HubSpot.
-                      </p>
+                      </p>`)}
                     </div>
                     <div className="BLOCK__segment-view__questionnaire pt-5 mt-5 THEME__border-top-light">
                       <form className="MODULE__form">

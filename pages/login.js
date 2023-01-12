@@ -7,6 +7,7 @@ import axios from "axios";
 import { setCookie } from "nookies";
 import { sleeper } from "@/lib/Helpers";
 import ProtectedRoute from "@/lib/ProtectedRoute";
+import parse from "html-react-parser";
 
 const Login = () => {
   const {
@@ -85,7 +86,7 @@ const Login = () => {
                     </div>
                     <div className="MODULE__auth-box__helper-wrapper mb-4 pb-3">
                       <span className="THEME__font-size-0n9">
-                        Don't have an account? <a href="/sign-up">Sign up</a>
+                        {parse(`Don't have an account? <a href="/sign-up">Sign up</a>`)}
                       </span>
                     </div>
                   </div>
