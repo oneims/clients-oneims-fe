@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import Container from "@/components/wrappers/Container";
 import { useAppContext } from "@/context/AppWrapper";
 import { Schema__Generic_Variables } from "@/lib/Schema";
@@ -11,12 +12,12 @@ const Header = ({ firstName, lastName, isLoggedIn }) => {
         <Container fluid>
           <div className="BLOCK__app-header__wrapper">
             <div className="BLOCK__app-header__logo-wrapper">
-              <a href={`${Schema__Generic_Variables.homeUrl}`}>
+              <Link href={`${Schema__Generic_Variables.homeUrl}`}>
                 <img
                   src="https://www.oneims.com/wp-content/themes/oneims-2019/Branding/white.svg"
                   alt="OneIMS Logo Inverted"
                 />
-              </a>
+              </Link>
             </div>
             {isLoggedIn && (
               <div className="BLOCK__app-header__info-wrapper">

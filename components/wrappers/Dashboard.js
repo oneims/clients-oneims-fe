@@ -9,17 +9,15 @@ const Dashboard = ({ children, segmentView }) => {
   return (
     <>
       {segmentView ? (
-        <>
-          <div className="BLOCK__segment-layout">
-            <Header
-              isLoggedIn={user?.isLoggedIn}
-              firstName={user?.firstName}
-              lastName={user?.lastName}
-            />
-            <Main>{children}</Main>
-            <Footer />
-          </div>
-        </>
+        <div className="BLOCK__segment-layout">
+          <Header
+            isLoggedIn={user?.isLoggedIn}
+            firstName={user?.firstName}
+            lastName={user?.lastName}
+          />
+          <Main>{children}</Main>
+          <Footer />
+        </div>
       ) : (
         <>
           <Header
