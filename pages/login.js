@@ -8,8 +8,10 @@ import { setCookie } from "nookies";
 import { sleeper } from "@/lib/Helpers";
 import ProtectedRoute from "@/lib/ProtectedRoute";
 import parse from "html-react-parser";
+import { useAppContext } from "@/context/AppWrapper";
 
 const Login = () => {
+  const { user } = useAppContext();
   const {
     register,
     handleSubmit,
@@ -72,46 +74,48 @@ const Login = () => {
   return (
     <>
       <ProtectedRoute type="login">
-        <main>
-          <Section>
-            <div className="container">
-              <div className="THEME__mw-400 mx-auto THEME__border-bottom-light pb-5 mb-5">
-                <div className="MODULE__auth-box">
-                  <div className="text-center">
-                    <div className="MODULE__auth-box__logo-wrapper mb-4">
-                      <img
-                        src="https://www.oneims.com/wp-content/themes/oneims-2019/Branding/OneIMS-logo-fullcolor.svg"
-                        alt="OneIMS Logo"
+        {!user.isLoading && (
+          <main>
+            <Section>
+              <div className="container">
+                <div className="THEME__mw-400 mx-auto THEME__border-bottom-light pb-5 mb-5">
+                  <div className="MODULE__auth-box">
+                    <div className="text-center">
+                      <div className="MODULE__auth-box__logo-wrapper mb-4">
+                        <img
+                          src="https://www.oneims.com/wp-content/themes/oneims-2019/Branding/OneIMS-logo-fullcolor.svg"
+                          alt="OneIMS Logo"
+                        />
+                      </div>
+                      <div className="MODULE__auth-box__helper-wrapper mb-4 pb-3">
+                        <span className="THEME__font-size-0n9">
+                          {parse(`Don't have an account? <a href="/sign-up">Sign up</a>`)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="MODULE__auth-box__form-wrapper">
+                      <Form
+                        onSubmit={handleSubmit(onSubmit)}
+                        register={register}
+                        schema={Schema__Form__Login}
+                        errors={errors}
+                        isDirty={isDirty}
+                        isValid={isValid}
+                        isLoading={loginUser.isLoading}
+                        errorMessage={errorMessage}
                       />
                     </div>
-                    <div className="MODULE__auth-box__helper-wrapper mb-4 pb-3">
-                      <span className="THEME__font-size-0n9">
-                        {parse(`Don't have an account? <a href="/sign-up">Sign up</a>`)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="MODULE__auth-box__form-wrapper">
-                    <Form
-                      onSubmit={handleSubmit(onSubmit)}
-                      register={register}
-                      schema={Schema__Form__Login}
-                      errors={errors}
-                      isDirty={isDirty}
-                      isValid={isValid}
-                      isLoading={loginUser.isLoading}
-                      errorMessage={errorMessage}
-                    />
                   </div>
                 </div>
+                <div className="THEME__mw-400 mx-auto text-center">
+                  <span className="THEME__font-size-0n8">
+                    ©{new Date().getFullYear()} OneIMS. All Rights Reserved.
+                  </span>
+                </div>
               </div>
-              <div className="THEME__mw-400 mx-auto text-center">
-                <span className="THEME__font-size-0n8">
-                  ©{new Date().getFullYear()} OneIMS. All Rights Reserved.
-                </span>
-              </div>
-            </div>
-          </Section>
-        </main>
+            </Section>
+          </main>
+        )}
       </ProtectedRoute>
     </>
   );

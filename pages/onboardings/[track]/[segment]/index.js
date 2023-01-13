@@ -2,7 +2,7 @@ import React from "react";
 import { useAppContext } from "@/context/AppWrapper";
 import ProtectedRoute from "@/lib/ProtectedRoute";
 import Segment from "@/components/layouts/Segment";
-import { useOnboardingNavigationBySlugGET, useSegmentBySlugGET } from "@/lib/Fetcher";
+import { useOnboardingNavigationBySlugGET } from "@/lib/Fetcher";
 import { useRouter } from "next/router";
 
 const SegmentPage = () => {
