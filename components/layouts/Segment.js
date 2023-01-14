@@ -10,6 +10,7 @@ import Spinner from "@/components/core/Spinner";
 import ReactMarkdown from "react-markdown";
 import Form from "@/components/core/Form";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 const Segment = ({
   isLoading,
@@ -21,7 +22,7 @@ const Segment = ({
   navigation,
   pageContent,
 }) => {
-  const { user } = useAppContext();
+  const { handlers, user } = useAppContext();
   const {
     register,
     handleSubmit,
@@ -36,12 +37,80 @@ const Segment = ({
     isError: null,
   });
   const onSubmit = (data) => {
-    console.log(data);
+    setSubmitForm((prevState) => ({ ...prevState, isLoading: true }));
+    const payload = {};
   };
+
+  let trackProgress;
 
   useEffect(() => {
     document.getElementById("segment-content").scrollTop = 0;
   }, [asPath]);
+
+  useEffect(() => {
+    if (navigation && !user.isLoading) {
+      trackProgress = {
+        trackType: trackTypeSlug,
+        parentTrackTitle,
+        parentTrackSlug,
+        segmentsCompleted: null,
+        readyToSubmit: null,
+      };
+      let segments = [];
+      navigation.forEach((elem) => {
+        const { attributes } = elem;
+        const formJson = attributes?.formJson;
+        let formFields = [];
+        if (formJson) {
+          formJson.fields.forEach((elem2) => {
+            const { group } = elem2;
+            if (group && group.length > 0) {
+              group.forEach((elem3) => {
+                formFields.push({
+                  name: elem3.name,
+                  value: null,
+                });
+              });
+            } else {
+              formFields.push({
+                name: elem2.name,
+                value: null,
+              });
+            }
+          });
+        }
+        segments.push({
+          title: attributes.title,
+          slug: attributes.slug,
+          formFields: formFields.length ? formFields : null,
+        });
+      });
+      trackProgress.segments = segments;
+      let ongoingTracks = user.progress ? user.progress.map((elem) => elem.parentTrackSlug) : [];
+      if (ongoingTracks.includes(parentTrackSlug)) return;
+      const postProgress = async () => {
+        const payload = {
+          progress: user.progress ? [...user.progress, trackProgress] : [trackProgress],
+        };
+        await axios
+          .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          })
+          .then((res) => {
+            handlers.mutateUser({
+              progress: user.progress ? [...user.progress, trackProgress] : [trackProgress],
+            });
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      };
+      postProgress();
+    }
+  }, [navigation]);
 
   return (
     <>
