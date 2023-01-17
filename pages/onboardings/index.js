@@ -36,12 +36,26 @@ const OnboardingsIndex = () => {
                     <Spinner />
                   </div>
                 )}
-                {data && (
+                {data && user.isLoggedIn && !user.isLoading && (
                   <div className="row justify-content-center">
                     {onboardings.map((elem, index) => {
                       const { attributes } = elem;
                       const title = attributes?.title;
                       const destination = `${router.asPath}/${attributes.slug}/${attributes?.segments?.data[0]?.attributes.slug}`;
+                      let completedSegments = 0;
+                      if (user.progress) {
+                        const indexOfActiveTrack = user.progress.findIndex(
+                          (elem) => elem.parentTrackSlug === attributes.slug
+                        );
+                        if (
+                          user.progress[indexOfActiveTrack] &&
+                          user.progress[indexOfActiveTrack].segmentsCompleted.length > 0
+                        ) {
+                          completedSegments =
+                            user.progress[indexOfActiveTrack].segmentsCompleted.length;
+                        }
+                      }
+                      const totalSegments = attributes?.segments?.data.length;
                       return (
                         <React.Fragment key={index}>
                           {attributes.segments?.data.length > 0 && (
@@ -62,9 +76,17 @@ const OnboardingsIndex = () => {
                                 )}
                                 <div className="MODULE__track-inline-card__progress-wrapper">
                                   <div className="d-flex align-items-center">
-                                    <div className="MODULE__track-inline-card__progress-dot MODULE__track-inline-card__progress-dot-completed"></div>
+                                    <div
+                                      className={`MODULE__track-inline-card__progress-dot ${
+                                        completedSegments > 0
+                                          ? `MODULE__track-inline-card__progress-dot-completed`
+                                          : ``
+                                      }`}
+                                    ></div>
                                     <div className="MODULE__track-inline-card__progress-text THEME__font-size-0n8">
-                                      <span>4 of 7 segments completed</span>
+                                      <span>
+                                        {completedSegments} of {totalSegments} segments completed
+                                      </span>
                                     </div>
                                   </div>
                                 </div>

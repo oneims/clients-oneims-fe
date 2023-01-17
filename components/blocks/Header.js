@@ -13,10 +13,7 @@ const Header = ({ firstName, lastName, isLoggedIn }) => {
           <div className="BLOCK__app-header__wrapper">
             <div className="BLOCK__app-header__logo-wrapper">
               <Link href={`${Schema__Generic_Variables.homeUrl}`}>
-                <img
-                  src="https://www.oneims.com/wp-content/themes/oneims-2019/Branding/white.svg"
-                  alt="OneIMS Logo Inverted"
-                />
+                <img src="/white.svg" alt="OneIMS Logo Inverted" />
               </Link>
             </div>
             {isLoggedIn && (

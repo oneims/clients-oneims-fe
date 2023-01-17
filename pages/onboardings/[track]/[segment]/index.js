@@ -24,7 +24,6 @@ const SegmentPage = () => {
     activeSegment = navigation.filter((elem) => elem?.attributes?.slug === segmentSlug)[0]
       .attributes;
     segmentTitle = activeSegment.title;
-    // console.log(activeSegment);
     pageContent = {
       content: activeSegment.content,
       form: activeSegment.formJson,
@@ -42,6 +41,7 @@ const SegmentPage = () => {
           parentTrackTitle={parentTrackTitle}
           navigation={navigation}
           segmentTitle={segmentTitle}
+          segmentSlug={segmentSlug}
           pageContent={pageContent}
         />
       </ProtectedRoute>
