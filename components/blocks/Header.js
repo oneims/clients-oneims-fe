@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import Container from "@/components/wrappers/Container";
 import { useAppContext } from "@/context/AppWrapper";
 import { Schema__Generic_Variables } from "@/lib/Schema";
@@ -12,18 +11,19 @@ const Header = ({ firstName, lastName, isLoggedIn }) => {
         <Container fluid>
           <div className="BLOCK__app-header__wrapper">
             <div className="BLOCK__app-header__logo-wrapper">
-              <Link href={`${Schema__Generic_Variables.homeUrl}`}>
+              <a href={`${Schema__Generic_Variables.homeUrl}`}>
                 <img src="/white.svg" alt="OneIMS Logo Inverted" />
-              </Link>
+              </a>
             </div>
             {isLoggedIn && (
               <div className="BLOCK__app-header__info-wrapper">
                 <div className="THEME__text-inverted THEME__font-size-0n9">
-                  <span className="THEME__f-600">
-                    Signed in as {firstName} {lastName}
+                  <span className="THEME__f-600 MODULE__signed-in-as">
+                    Signed in as {firstName} {lastName}{" "}
+                    <span className="THEME__f-400">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                   </span>
                   <span onClick={() => handlers.handleLogout()} className="THEME__cursor-pointer">
-                    &nbsp;&nbsp;|&nbsp;&nbsp;Log out
+                    Log out
                   </span>
                 </div>
               </div>

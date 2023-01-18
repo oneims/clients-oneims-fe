@@ -40,12 +40,13 @@ const OnboardingsIndex = () => {
                   <div className="row justify-content-center">
                     {onboardings.map((elem, index) => {
                       const { attributes } = elem;
+                      const id = elem.id;
                       const title = attributes?.title;
                       const destination = `${router.asPath}/${attributes.slug}/${attributes?.segments?.data[0]?.attributes.slug}`;
                       let completedSegments = 0;
                       if (user.progress) {
                         const indexOfActiveTrack = user.progress.findIndex(
-                          (elem) => elem.parentTrackSlug === attributes.slug
+                          (elem) => elem.parentTrackId === id
                         );
                         if (
                           user.progress[indexOfActiveTrack] &&
@@ -59,7 +60,7 @@ const OnboardingsIndex = () => {
                       return (
                         <React.Fragment key={index}>
                           {attributes.segments?.data.length > 0 && (
-                            <div className="col-lg-6">
+                            <div className="col-md-6 mb-4">
                               <div className="MODULE__track-inline-card position-relative">
                                 <a
                                   href={`${destination}`}

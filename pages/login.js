@@ -45,7 +45,7 @@ const Login = () => {
           setLoginUser((prevState) => ({
             ...prevState,
             response: res.data.data,
-            isLoading: false,
+            isLoading: true,
           }));
           setCookie({ res }, "token", jwt, {
             secure: process.env.NODE_ENV !== "development",
@@ -58,7 +58,7 @@ const Login = () => {
             path: "/",
           });
           location.replace(`${Schema__Generic_Variables.loginSuccessUrl}`);
-          reset();
+          // reset();
         })
         .catch((err) => {
           console.log(err);
@@ -82,10 +82,7 @@ const Login = () => {
                   <div className="MODULE__auth-box">
                     <div className="text-center">
                       <div className="MODULE__auth-box__logo-wrapper mb-4">
-                        <img
-                          src="https://www.oneims.com/wp-content/themes/oneims-2019/Branding/OneIMS-logo-fullcolor.svg"
-                          alt="OneIMS Logo"
-                        />
+                        <img src="/OneIMS-logo-fullcolor.svg" alt="OneIMS Logo" />
                       </div>
                       <div className="MODULE__auth-box__helper-wrapper mb-4 pb-3">
                         <span className="THEME__font-size-0n9">

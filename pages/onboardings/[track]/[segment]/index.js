@@ -12,7 +12,14 @@ const SegmentPage = () => {
   const parentTrackSlug = router?.query?.track;
   const trackTypeSlug = pathname.split("/")[1];
   const segmentSlug = query?.segment;
-  let parentTrackTitle, navigation, activeSegment, segmentTitle, pageContent;
+  let parentTrackTitle,
+    navigation,
+    activeSegment,
+    activeSegmentData,
+    activeSegmentId,
+    segmentTitle,
+    parentTrackId,
+    pageContent;
   const { data, isLoading, isError } = useOnboardingNavigationBySlugGET(
     parentTrackSlug,
     user?.token
@@ -21,12 +28,15 @@ const SegmentPage = () => {
   if (data) {
     navigation = data?.data[0]?.attributes?.segments.data;
     parentTrackTitle = data?.data[0]?.attributes.title;
-    activeSegment = navigation.filter((elem) => elem?.attributes?.slug === segmentSlug)[0]
-      .attributes;
-    segmentTitle = activeSegment.title;
+    parentTrackId = data?.data[0].id;
+    activeSegment = navigation.filter((elem) => elem?.attributes?.slug === segmentSlug)[0];
+    activeSegmentData = activeSegment.attributes;
+    activeSegmentId = activeSegment.id;
+    segmentTitle = activeSegmentData.title;
     pageContent = {
-      content: activeSegment.content,
-      form: activeSegment.formJson,
+      content: activeSegmentData.content,
+      form: activeSegmentData.formJson,
+      videoId: activeSegmentData.videoId,
     };
   }
 
@@ -43,6 +53,8 @@ const SegmentPage = () => {
           segmentTitle={segmentTitle}
           segmentSlug={segmentSlug}
           pageContent={pageContent}
+          activeSegmentId={activeSegmentId}
+          parentTrackId={parentTrackId}
         />
       </ProtectedRoute>
     </>

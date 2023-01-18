@@ -12,6 +12,7 @@ import Form from "@/components/core/Form";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import Script from "next/script";
 
 const Segment = ({
   isLoading,
@@ -23,11 +24,14 @@ const Segment = ({
   segmentSlug,
   navigation,
   pageContent,
+  activeSegmentId,
+  parentTrackId,
 }) => {
   const { handlers, user } = useAppContext();
   const [progressIndexOfActiveTrack, setProgressIndexOfActiveTrack] = useState(null);
   const [progressIndexOfActiveSegment, setProgressIndexOfActiveSegment] = useState(null);
   const [trackAlreadyInProgress, setTrackAlreadyInProgress] = useState(false);
+  const [wistiaLoaded, setWistiaLoaded] = useState(false);
   const {
     register,
     handleSubmit,
@@ -46,15 +50,16 @@ const Segment = ({
   let trackProgress;
 
   const onSubmit = (data) => {
-    console.log(data);
     if (user.progress) {
       const { progress } = user;
       let updatedProgress = JSON.parse(JSON.stringify(progress));
       updatedProgress[progressIndexOfActiveTrack].segments[
         progressIndexOfActiveSegment
       ].formFields = data;
-      if (!updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.includes(segmentSlug)) {
-        updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.push(segmentSlug);
+      if (
+        !updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.includes(activeSegmentId)
+      ) {
+        updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.push(activeSegmentId);
       }
       if (
         updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.length ===
@@ -96,10 +101,10 @@ const Segment = ({
   const updateIndexOfActiveTrackAndSegment = () => {
     if (!isLoading && !user.loading && trackAlreadyInProgress) {
       const indexOfActiveTrack = user.progress.findIndex(
-        (elem) => elem.parentTrackSlug === parentTrackSlug
+        (elem) => elem.parentTrackId === parentTrackId
       );
       const indexOfActiveSegment = user.progress[indexOfActiveTrack].segments.findIndex((elem) => {
-        return elem.slug === segmentSlug;
+        return elem.id === activeSegmentId;
       });
       setProgressIndexOfActiveTrack(indexOfActiveTrack);
       setProgressIndexOfActiveSegment(indexOfActiveSegment);
@@ -111,6 +116,7 @@ const Segment = ({
       trackProgress = {
         trackType: trackTypeSlug,
         parentTrackTitle,
+        parentTrackId,
         parentTrackSlug,
         segmentsCompleted: [],
         readyToSubmit: false,
@@ -137,12 +143,13 @@ const Segment = ({
         segments.push({
           title: attributes.title,
           slug: attributes.slug,
+          id: elem.id,
           formFields: Object.keys(formFields).length ? formFields : null,
         });
       });
       trackProgress.segments = segments;
-      let ongoingTracks = user.progress ? user.progress.map((elem) => elem.parentTrackSlug) : [];
-      if (ongoingTracks.includes(parentTrackSlug)) {
+      let ongoingTracks = user.progress ? user.progress.map((elem) => elem.parentTrackId) : [];
+      if (ongoingTracks.includes(parentTrackId)) {
         setTrackAlreadyInProgress(true);
       } else {
         const postProgress = async () => {
@@ -171,10 +178,29 @@ const Segment = ({
     }
   };
 
+  const checkWistiaLoaded = (id) => {
+    setWistiaLoaded(false);
+    if (typeof window !== "undefined" && id) {
+      window._wq = window._wq || [];
+      _wq.push({
+        id,
+        onReady: function (video) {
+          if (video.embedded) {
+            setTimeout(() => {
+              setWistiaLoaded(true);
+            }, 100);
+          }
+        },
+      });
+      // console.log(window._wq);
+    }
+  };
+
   useEffect(() => {
     document.getElementById("segment-content").scrollTop = 0;
     updateIndexOfActiveTrackAndSegment();
     reset();
+    checkWistiaLoaded(pageContent?.videoId);
   }, [asPath]);
 
   useEffect(() => {
@@ -187,6 +213,7 @@ const Segment = ({
 
   useEffect(() => {
     if (
+      user &&
       user.progress &&
       progressIndexOfActiveTrack !== null &&
       progressIndexOfActiveSegment !== null
@@ -195,6 +222,7 @@ const Segment = ({
         user.progress[progressIndexOfActiveTrack].segments[progressIndexOfActiveSegment].formFields
       );
     }
+    checkWistiaLoaded(pageContent?.videoId);
   }, [user, progressIndexOfActiveTrack, progressIndexOfActiveSegment]);
 
   return (
@@ -229,14 +257,14 @@ const Segment = ({
           <Section className="BLOCK__segment-view">
             <div className="BLOCK__segment-view__wrapper">
               <div className="BLOCK__segment-view__column BLOCK__segment-view__column-left">
-                {isLoading && !progressIndexOfActiveTrack && (
+                {isLoading && (
                   <>
                     <div className="pt-5 mt-5 THEME__generic-spinner-wrapper">
                       <Spinner />
                     </div>
                   </>
                 )}
-                {navigation && progressIndexOfActiveTrack !== null && (
+                {navigation && (
                   <div className="MODULE__segment-sidebar">
                     {navigation.map((elem, index) => {
                       const { attributes } = elem;
@@ -259,9 +287,10 @@ const Segment = ({
                                   <div
                                     className={`MODULE__segment-sidebar__item__progress-circle ${
                                       user &&
+                                      progressIndexOfActiveTrack !== null &&
                                       user.progress[
                                         progressIndexOfActiveTrack
-                                      ]?.segmentsCompleted.includes(slug) &&
+                                      ]?.segmentsCompleted.includes(elem.id) &&
                                       "MODULE__segment-sidebar__item__progress-circle-completed"
                                     }`}
                                   ></div>
@@ -305,15 +334,41 @@ const Segment = ({
                   </div>
                 )}
                 {pageContent && (
-                  <div className="THEME__mw-700 mx-auto BLOCK__medium px-4">
+                  <div className="THEME__mw-900 mx-auto BLOCK__medium px-4">
                     <div className="BLOCK__segment-view__body pb-md-5">
                       {pageContent.content && (
-                        <div className="MODULE__article-content MODULE__article-content-smaller-headings">
-                          <ReactMarkdown>{pageContent.content}</ReactMarkdown>
-                        </div>
+                        <>
+                          {pageContent.videoId && (
+                            <React.Fragment key={segmentSlug}>
+                              <Script
+                                src={`https://fast.wistia.com/embed/medias/${pageContent.videoId}.jsonp`}
+                                strategy="beforeInteractive"
+                              />
+                              <Script
+                                src={"https://fast.wistia.com/assets/external/E-v1.js"}
+                                defer
+                              />
+                              <div
+                                className={`${
+                                  !wistiaLoaded ? `MODULE__wistia-wrapper-loading` : ``
+                                } MODULE__wistia-wrapper`}
+                              >
+                                {!wistiaLoaded && <Spinner />}
+                                <div
+                                  className={`MODULE__wistia-wrapper__video wistia_embed wistia_async_${pageContent.videoId}`}
+                                ></div>
+                              </div>
+                            </React.Fragment>
+                          )}
+                          <div className="THEME__mw-700 mx-auto">
+                            <div className="MODULE__article-content MODULE__article-content-smaller-headings">
+                              <ReactMarkdown>{pageContent.content}</ReactMarkdown>
+                            </div>
+                          </div>
+                        </>
                       )}
                       {pageContent.form && (
-                        <div className="BLOCK__segment-view__questionnaire pt-5 mt-5 THEME__border-top-light">
+                        <div className="BLOCK__segment-view__questionnaire pt-5 mt-5 THEME__border-top-light THEME__mw-700 mx-auto">
                           <Form
                             onSubmit={handleSubmit(onSubmit)}
                             register={register}
