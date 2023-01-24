@@ -461,8 +461,8 @@ const Segment = ({
                               <div className="col-lg-10 mt-3 ps-lg-4">
                                 <h2 className="h4 THEME__f-600">Awesome, {user?.firstName}!</h2>
                                 <p>
-                                  You've successfully completed {parentTrackTitle}. Please click the
-                                  button below to notify your Account Manager.
+                                  You have successfully completed {parentTrackTitle}. Please click
+                                  the button below to notify your Account Manager.
                                 </p>
                                 <div className="mt-4">
                                   <Button variant="primary" type="button">
