@@ -794,6 +794,15 @@
         }
       }
     }
+    &__completed-block {
+      &__icon-wrapper {
+        img {
+          max-width: 173px;
+          max-height: 140px;
+          object-fit: contain;
+        }
+      }
+    }
   }
   &__segment-layout {
     @media (min-width: 768px) {

@@ -29,33 +29,49 @@ const SegmentPage = () => {
     navigation = data?.data[0]?.attributes?.segments.data;
     parentTrackTitle = data?.data[0]?.attributes.title;
     parentTrackId = data?.data[0].id;
-    activeSegment = navigation.filter((elem) => elem?.attributes?.slug === segmentSlug)[0];
-    activeSegmentData = activeSegment.attributes;
-    activeSegmentId = activeSegment.id;
-    segmentTitle = activeSegmentData.title;
-    pageContent = {
-      content: activeSegmentData.content,
-      form: activeSegmentData.formJson,
-      videoId: activeSegmentData.videoId,
-    };
+    if (segmentSlug !== `complete`) {
+      activeSegment = navigation.filter((elem) => elem?.attributes?.slug === segmentSlug)[0];
+      activeSegmentData = activeSegment?.attributes;
+      activeSegmentId = activeSegment?.id;
+      segmentTitle = activeSegmentData?.title;
+      pageContent = {
+        content: activeSegmentData?.content,
+        form: activeSegmentData?.formJson,
+        videoId: activeSegmentData?.videoId,
+      };
+    }
   }
 
   return (
     <>
       <ProtectedRoute>
-        <Segment
-          isLoading={isLoading}
-          asPath={asPath}
-          trackTypeSlug={trackTypeSlug}
-          parentTrackSlug={parentTrackSlug}
-          parentTrackTitle={parentTrackTitle}
-          navigation={navigation}
-          segmentTitle={segmentTitle}
-          segmentSlug={segmentSlug}
-          pageContent={pageContent}
-          activeSegmentId={activeSegmentId}
-          parentTrackId={parentTrackId}
-        />
+        {segmentSlug !== `complete` ? (
+          <Segment
+            isLoading={isLoading}
+            asPath={asPath}
+            trackTypeSlug={trackTypeSlug}
+            parentTrackSlug={parentTrackSlug}
+            parentTrackTitle={parentTrackTitle}
+            navigation={navigation}
+            segmentTitle={segmentTitle}
+            segmentSlug={segmentSlug}
+            pageContent={pageContent}
+            activeSegmentId={activeSegmentId}
+            parentTrackId={parentTrackId}
+          />
+        ) : (
+          <Segment
+            isLoading={isLoading}
+            asPath={asPath}
+            trackTypeSlug={trackTypeSlug}
+            parentTrackSlug={parentTrackSlug}
+            parentTrackTitle={parentTrackTitle}
+            navigation={navigation}
+            segmentTitle={`Complete This Track`}
+            parentTrackId={parentTrackId}
+            isCompletePage={true}
+          />
+        )}
       </ProtectedRoute>
     </>
   );

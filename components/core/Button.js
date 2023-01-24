@@ -36,7 +36,7 @@ const Button = ({
             type={type}
             className={`THEME__button THEME__button-${variant} ${className} ${
               isLoading &&
-              "THEME__opacity-70 pointer-events-none d-flex align-items-center justify-content-center"
+              "THEME__opacity-70 pe-none d-flex align-items-center justify-content-center"
             }`}
           >
             {children}

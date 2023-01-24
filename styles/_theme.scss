@@ -395,5 +395,10 @@
   &__super-large-heading {
     font-size: 4rem;
   }
+  &__list-with-spacing {
+    li {
+      margin-bottom: 0.5rem;
+    }
+  }
   // New Theme items here
 }

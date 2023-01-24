@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Script from "next/script";
+import Button from "../core/Button";
 
 const Segment = ({
   isLoading,
@@ -26,12 +27,14 @@ const Segment = ({
   pageContent,
   activeSegmentId,
   parentTrackId,
+  isCompletePage,
 }) => {
   const { handlers, user } = useAppContext();
   const [progressIndexOfActiveTrack, setProgressIndexOfActiveTrack] = useState(null);
   const [progressIndexOfActiveSegment, setProgressIndexOfActiveSegment] = useState(null);
   const [trackAlreadyInProgress, setTrackAlreadyInProgress] = useState(false);
   const [wistiaLoaded, setWistiaLoaded] = useState(false);
+  const [incompletedSegments, setIncompletedSegments] = useState(null);
   const {
     register,
     handleSubmit,
@@ -120,6 +123,7 @@ const Segment = ({
         parentTrackSlug,
         segmentsCompleted: [],
         readyToSubmit: false,
+        trackCompletedAndNotified: false,
       };
       let segments = [];
       navigation.forEach((elem) => {
@@ -196,6 +200,17 @@ const Segment = ({
     }
   };
 
+  const getListOfIncompletedSegments = () => {
+    if (isCompletePage && progressIndexOfActiveTrack !== null) {
+      const completedSegments = user.progress[progressIndexOfActiveTrack]?.segmentsCompleted;
+      const incompletedSegments = navigation.filter((elem) => {
+        return completedSegments.length > 0 ? !completedSegments.includes(elem.id) : navigation;
+      });
+      setIncompletedSegments(incompletedSegments);
+      console.log(`incompleted Segments`, incompletedSegments);
+    }
+  };
+
   useEffect(() => {
     document.getElementById("segment-content").scrollTop = 0;
     updateIndexOfActiveTrackAndSegment();
@@ -216,13 +231,15 @@ const Segment = ({
       user &&
       user.progress &&
       progressIndexOfActiveTrack !== null &&
-      progressIndexOfActiveSegment !== null
+      progressIndexOfActiveSegment !== null &&
+      !isCompletePage
     ) {
       reset(
         user.progress[progressIndexOfActiveTrack].segments[progressIndexOfActiveSegment].formFields
       );
     }
     checkWistiaLoaded(pageContent?.videoId);
+    getListOfIncompletedSegments();
   }, [user, progressIndexOfActiveTrack, progressIndexOfActiveSegment]);
 
   return (
@@ -306,12 +323,21 @@ const Segment = ({
                         </Link>
                       );
                     })}
-                    <Link href="#" className="THEME__text-decoration-none">
-                      <div className="MODULE__segment-sidebar__item MODULE__segment-sidebar__item mb-5">
+                    <Link
+                      href={`/${trackTypeSlug}/${parentTrackSlug}/complete`}
+                      className="THEME__text-decoration-none"
+                    >
+                      <div
+                        className={`MODULE__segment-sidebar__item ${
+                          asPath == `/${trackTypeSlug}/${parentTrackSlug}/complete`
+                            ? `MODULE__segment-sidebar__item-active`
+                            : ``
+                        } THEME__cursor-pointer`}
+                      >
                         <div className="MODULE__segment-sidebar__item__row">
                           <div className="MODULE__segment-sidebar__item__col MODULE__segment-sidebar__item__col-right">
                             <h2 className="MODULE__segment-sidebar__item__heading h7 mb-0 THEME__f-600">
-                              Complete this track
+                              Complete This Track
                             </h2>
                           </div>
                         </div>
@@ -382,6 +408,74 @@ const Segment = ({
                       )}
                     </div>
                   </div>
+                )}
+
+                {isCompletePage && (
+                  <>
+                    {incompletedSegments && incompletedSegments.length > 0 ? (
+                      <div className="THEME__mw-900 mx-auto BLOCK__medium px-4">
+                        <div className="BLOCK__segment-view__body pb-md-5">
+                          <div className="BLOCK__segment-view__completed-block">
+                            <div className="row">
+                              <div className="col-lg-2">
+                                <div className="BLOCK__segment-view__completed-block__icon-wrapper pt-3">
+                                  <img src="/announcement.svg" alt="Announcement" />
+                                </div>
+                              </div>
+                              <div className="col-lg-10 mt-3 ps-lg-4">
+                                <h2 className="h4 THEME__f-600">
+                                  You have a few segment(s) left to complete.
+                                </h2>
+                                <p>
+                                  Please complete the following segments to notify your account
+                                  manager regarding your progress.
+                                </p>
+                                <ul className="THEME__list-with-spacing">
+                                  {incompletedSegments.map((elem, index) => {
+                                    return (
+                                      <li key={index}>
+                                        <Link
+                                          href={`/${trackTypeSlug}/${parentTrackSlug}/${elem.attributes.slug}`}
+                                        >
+                                          {elem.attributes.title}
+                                        </Link>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="THEME__mw-900 mx-auto BLOCK__medium px-4">
+                        <div className="BLOCK__segment-view__body pb-md-5">
+                          <div className="BLOCK__segment-view__completed-block">
+                            <div className="row">
+                              <div className="col-lg-2">
+                                <div className="BLOCK__segment-view__completed-block__icon-wrapper">
+                                  <img src="/trophy.svg" alt="Trophy" />
+                                </div>
+                              </div>
+                              <div className="col-lg-10 mt-3 ps-lg-4">
+                                <h2 className="h4 THEME__f-600">Awesome, {user?.firstName}!</h2>
+                                <p>
+                                  You've successfully completed {parentTrackTitle}. Please click the
+                                  button below to notify your Account Manager.
+                                </p>
+                                <div className="mt-4">
+                                  <Button variant="primary" type="button">
+                                    Complete this track
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
