@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
 
 const SegmentsArchive = () => {
-  return (
-    <div>SegmentsArchive</div>
-  )
-}
+  const router = useRouter();
+  useEffect(() => {
+    router.push(`/login`);
+  }, []);
+  return <></>;
+};
 
-export default SegmentsArchive
+export default SegmentsArchive;
