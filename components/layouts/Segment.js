@@ -96,6 +96,96 @@ const Segment = ({
     }
   };
 
+  const syncTrackWithProgress = () => {
+    if (
+      progressIndexOfActiveTrack !== null &&
+      progressIndexOfActiveSegment !== null &&
+      !isCompletePage &&
+      user
+    ) {
+      const progress = user.progress;
+      const progressSegmentsInCurrentTrack = progress[progressIndexOfActiveTrack].segments;
+      const progressSegmentsInCurrentTrackIds = progressSegmentsInCurrentTrack.map(
+        (elem) => elem.id
+      );
+      const navigationIds = navigation.map((elem) => elem.id);
+      console.log(progressSegmentsInCurrentTrackIds, navigationIds);
+      if (JSON.stringify(progressSegmentsInCurrentTrackIds) !== JSON.stringify(navigationIds)) {
+        let updatedProgress = JSON.parse(JSON.stringify(progress));
+        let updatedSegments = [...progressSegmentsInCurrentTrack];
+        let segmentsNotInProgress = navigation.filter((elem) => {
+          return !progressSegmentsInCurrentTrack.some((elem2) => {
+            return elem.id === elem2.id;
+          });
+        });
+        const segmentIdsToRemoveFromProgress = progressSegmentsInCurrentTrackIds.filter(function (
+          obj
+        ) {
+          return navigationIds.indexOf(obj) == -1;
+        });
+        console.log(`segment not in progress, `, segmentsNotInProgress);
+        console.log(`segments to remove`, segmentIdsToRemoveFromProgress);
+        segmentsNotInProgress.forEach((elem) => {
+          const { attributes } = elem;
+          const formJson = attributes?.formJson;
+          let formFields = {};
+          if (formJson) {
+            formJson.fields.forEach((elem2) => {
+              const { group } = elem2;
+              if (group && group.length > 0) {
+                group.forEach((elem3) => {
+                  const { name } = elem3;
+                  formFields[name] = null;
+                });
+              } else {
+                const { name } = elem2;
+                formFields[name] = null;
+              }
+            });
+          }
+          updatedSegments.push({
+            title: attributes.title,
+            slug: attributes.slug,
+            id: elem.id,
+            formFields: Object.keys(formFields).length ? formFields : null,
+          });
+        });
+        if (segmentIdsToRemoveFromProgress && segmentIdsToRemoveFromProgress.length > 0) {
+          updatedSegments = updatedSegments.filter((elem) => {
+            return !segmentIdsToRemoveFromProgress.some((elem2) => {
+              return elem.id === elem2;
+            });
+          });
+        }
+        console.log(`updatedSegments`, updatedSegments);
+        updatedProgress[progressIndexOfActiveTrack].segments = updatedSegments;
+        const postProgress = async () => {
+          const payload = {
+            progress: updatedProgress,
+          };
+          await axios
+            .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+            })
+            .then((res) => {
+              console.log(res);
+              console.log("Synced track updates");
+              handlers.mutateUser({
+                progress: updatedProgress,
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+              console.log("Error -- Problem syncing questionnaire");
+            });
+        };
+        postProgress();
+      }
+    }
+  };
+
   const syncQuestionnaireWithProgress = () => {
     if (
       progressIndexOfActiveTrack !== null &&
@@ -105,7 +195,7 @@ const Segment = ({
     ) {
       const progress = user.progress;
       const questionnaireInProgress =
-        progress[progressIndexOfActiveTrack].segments[progressIndexOfActiveSegment].formFields;
+        progress[progressIndexOfActiveTrack]?.segments[progressIndexOfActiveSegment]?.formFields;
       const questionnaireInSegment = {};
       pageContent.form.fields.forEach((elem) => {
         const { group } = elem;
@@ -161,8 +251,6 @@ const Segment = ({
             });
         };
         postProgress();
-      } else {
-        console.log("questionnaire in sync with progress");
       }
     }
   };
@@ -271,7 +359,6 @@ const Segment = ({
         return completedSegments.length > 0 ? !completedSegments.includes(elem.id) : navigation;
       });
       setIncompletedSegments(incompletedSegments);
-      console.log(`incompleted Segments`, incompletedSegments);
     }
   };
 
@@ -291,7 +378,8 @@ const Segment = ({
   }, [trackAlreadyInProgress]);
 
   useEffect(() => {
-    // syncQuestionnaireWithProgress();
+    syncTrackWithProgress();
+    syncQuestionnaireWithProgress();
     if (
       user &&
       user.progress &&

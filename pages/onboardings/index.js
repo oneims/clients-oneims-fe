@@ -40,9 +40,13 @@ const OnboardingsIndex = () => {
                   <div className="row justify-content-center">
                     {onboardings.map((elem, index) => {
                       const { attributes } = elem;
+                      const segments = attributes?.segments?.data;
+                      segments.sort((a, b) => {
+                        return a?.attributes?.order - b?.attributes?.order;
+                      });
                       const id = elem.id;
                       const title = attributes?.title;
-                      const destination = `${router.asPath}/${attributes.slug}/${attributes?.segments?.data[0]?.attributes.slug}`;
+                      const destination = `${router.asPath}/${attributes.slug}/${segments[0]?.attributes.slug}`;
                       let completedSegments = 0;
                       if (user.progress) {
                         const indexOfActiveTrack = user.progress.findIndex(
@@ -52,8 +56,14 @@ const OnboardingsIndex = () => {
                           user.progress[indexOfActiveTrack] &&
                           user.progress[indexOfActiveTrack].segmentsCompleted.length > 0
                         ) {
-                          completedSegments =
-                            user.progress[indexOfActiveTrack].segmentsCompleted.length;
+                          const idsOfSegmentsInTrack = attributes?.segments?.data.map(
+                            (elem) => elem.id
+                          );
+                          completedSegments = idsOfSegmentsInTrack.filter((elem) =>
+                            user.progress[indexOfActiveTrack].segmentsCompleted.some(
+                              (elem2) => elem === elem2
+                            )
+                          ).length;
                         }
                       }
                       const totalSegments = attributes?.segments?.data.length;

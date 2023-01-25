@@ -30,7 +30,6 @@ const SegmentPage = () => {
     navigation.sort((a, b) => {
       return a.attributes.order - b.attributes.order;
     });
-    console.log(navigation);
     parentTrackTitle = data?.data[0]?.attributes.title;
     parentTrackId = data?.data[0].id;
     if (segmentSlug !== `complete`) {
