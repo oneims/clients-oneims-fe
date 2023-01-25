@@ -14,6 +14,7 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Script from "next/script";
 import Button from "../core/Button";
+import { compareKeys } from "@/lib/Helpers";
 
 const Segment = ({
   isLoading,
@@ -64,12 +65,6 @@ const Segment = ({
       ) {
         updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.push(activeSegmentId);
       }
-      if (
-        updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.length ===
-        updatedProgress[progressIndexOfActiveTrack].segments.length
-      ) {
-        updatedProgress[progressIndexOfActiveTrack].readyToSubmit = true;
-      }
       console.log(`MY PROGRESS:`, progress);
       // **Form Submission Starts Below
       const postProgress = async () => {
@@ -101,6 +96,77 @@ const Segment = ({
     }
   };
 
+  const syncQuestionnaireWithProgress = () => {
+    if (
+      progressIndexOfActiveTrack !== null &&
+      progressIndexOfActiveSegment !== null &&
+      !isCompletePage &&
+      user
+    ) {
+      const progress = user.progress;
+      const questionnaireInProgress =
+        progress[progressIndexOfActiveTrack].segments[progressIndexOfActiveSegment].formFields;
+      const questionnaireInSegment = {};
+      pageContent.form.fields.forEach((elem) => {
+        const { group } = elem;
+        if (group && group.length > 0) {
+          group.forEach((elem2) => {
+            const { name } = elem2;
+            questionnaireInSegment[name] = null;
+          });
+        } else {
+          const { name } = elem;
+          questionnaireInSegment[name] = null;
+        }
+        Object.keys(questionnaireInSegment).forEach((key) => {
+          questionnaireInSegment[key] = questionnaireInProgress[key];
+        });
+      });
+      const similar = compareKeys(questionnaireInProgress, questionnaireInSegment);
+      if (!similar) {
+        let updatedProgress = JSON.parse(JSON.stringify(progress));
+        updatedProgress[progressIndexOfActiveTrack].segments[
+          progressIndexOfActiveSegment
+        ].formFields = questionnaireInSegment;
+        if (
+          updatedProgress[progressIndexOfActiveTrack].segmentsCompleted.includes(activeSegmentId)
+        ) {
+          const updatedCompletedSegments = updatedProgress[
+            progressIndexOfActiveTrack
+          ].segmentsCompleted.filter((elem) => {
+            return elem !== activeSegmentId;
+          });
+          updatedProgress[progressIndexOfActiveTrack].segmentsCompleted = updatedCompletedSegments;
+        }
+        const postProgress = async () => {
+          const payload = {
+            progress: updatedProgress,
+          };
+          await axios
+            .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+            })
+            .then((res) => {
+              console.log(res);
+              console.log("Synced questionnaire");
+              handlers.mutateUser({
+                progress: updatedProgress,
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+              console.log("Error -- Problem syncing questionnaire");
+            });
+        };
+        postProgress();
+      } else {
+        console.log("questionnaire in sync with progress");
+      }
+    }
+  };
+
   const updateIndexOfActiveTrackAndSegment = () => {
     if (!isLoading && !user.loading && trackAlreadyInProgress) {
       const indexOfActiveTrack = user.progress.findIndex(
@@ -122,7 +188,6 @@ const Segment = ({
         parentTrackId,
         parentTrackSlug,
         segmentsCompleted: [],
-        readyToSubmit: false,
         trackCompletedAndNotified: false,
       };
       let segments = [];
@@ -196,12 +261,11 @@ const Segment = ({
           }
         },
       });
-      // console.log(window._wq);
     }
   };
 
   const getListOfIncompletedSegments = () => {
-    if (isCompletePage && progressIndexOfActiveTrack !== null) {
+    if (progressIndexOfActiveTrack !== null) {
       const completedSegments = user.progress[progressIndexOfActiveTrack]?.segmentsCompleted;
       const incompletedSegments = navigation.filter((elem) => {
         return completedSegments.length > 0 ? !completedSegments.includes(elem.id) : navigation;
@@ -227,6 +291,7 @@ const Segment = ({
   }, [trackAlreadyInProgress]);
 
   useEffect(() => {
+    // syncQuestionnaireWithProgress();
     if (
       user &&
       user.progress &&
@@ -235,7 +300,8 @@ const Segment = ({
       !isCompletePage
     ) {
       reset(
-        user.progress[progressIndexOfActiveTrack].segments[progressIndexOfActiveSegment].formFields
+        user.progress[progressIndexOfActiveTrack]?.segments[progressIndexOfActiveSegment]
+          ?.formFields
       );
     }
     checkWistiaLoaded(pageContent?.videoId);

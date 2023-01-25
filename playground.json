@@ -3,13 +3,13 @@
     "type": "submit",
     "title": "Save my progress",
     "variant": "tertiary",
-    "className": "w-100"
+    "className": ""
   },
   "fields": [
     {
       "group": [
         {
-          "name": "sample_question_one",
+          "name": "123333_sample_question_one",
           "type": "text",
           "label": "Sample Question One",
           "element": "input",
@@ -25,7 +25,7 @@
           }
         },
         {
-          "name": "sample_question_two",
+          "name": "123_sample_question_two",
           "type": "text",
           "label": "Sample Question Two",
           "element": "input",
@@ -45,7 +45,7 @@
     {
       "group": [
         {
-          "name": "sample_question_three",
+          "name": "123_sample_question_three",
           "type": "text",
           "label": "Sample Question Three",
           "element": "input",
@@ -61,9 +61,45 @@
           }
         },
         {
-          "name": "sample_question_four",
+          "name": "123_sample_question_four",
           "type": "text",
           "label": "Sample Question Four",
+          "element": "input",
+          "validations": {
+            "pattern": {
+              "value": "/^S*$/",
+              "message": "Must only be characters"
+            },
+            "required": {
+              "value": true,
+              "message": "Please complete this required field"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group": [
+        {
+          "name": "123sdad_sample_question_five",
+          "type": "text",
+          "label": "Sample Question Five",
+          "element": "input",
+          "validations": {
+            "pattern": {
+              "value": "/^S*$/",
+              "message": "Must only be characters"
+            },
+            "required": {
+              "value": true,
+              "message": "Please complete this required field"
+            }
+          }
+        },
+        {
+          "name": "123dasda_sample_question_six",
+          "type": "text",
+          "label": "Sample Question Six",
           "element": "input",
           "validations": {
             "pattern": {
