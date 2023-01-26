@@ -15,6 +15,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Script from "next/script";
 import Button from "../core/Button";
 import { compareKeys } from "@/lib/Helpers";
+import { Schema__Generic_Variables } from "@/lib/Schema";
 
 const Segment = ({
   isLoading,
@@ -36,6 +37,7 @@ const Segment = ({
   const [trackAlreadyInProgress, setTrackAlreadyInProgress] = useState(false);
   const [wistiaLoaded, setWistiaLoaded] = useState(false);
   const [incompletedSegments, setIncompletedSegments] = useState(null);
+  const [notifying, setNotifying] = useState(false);
   const {
     register,
     handleSubmit,
@@ -93,6 +95,66 @@ const Segment = ({
           });
       };
       postProgress();
+    }
+  };
+
+  const completeTrack = () => {
+    if (user && user.progress) {
+      let updatedProgress = JSON.parse(JSON.stringify(user.progress));
+      const notifyProgressEmail = async () => {
+        setNotifying(true);
+        const payload = {
+          toEmailAddress: "parasbokhari@gmail.com",
+          subject: "User Progress Submitted - OneIMS Clients",
+          dynamicTemplateData: {
+            userFirstName: user.firstName,
+            userLastName: user.lastName,
+            userCompanyName: user.company,
+            trackName: parentTrackTitle,
+            userProgressDestination: `${Schema__Generic_Variables.domain}/users/${user.id}`,
+          },
+        };
+        await axios
+          .post(`${process.env.NEXT_PUBLIC_API_URL}/trigger-email/notify-user-progress`, payload, {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          })
+          .then((res) => {
+            toast.success("Notification sent!");
+            console.log(res);
+            updatedProgress[progressIndexOfActiveTrack].trackCompletedAndNotified = true;
+            const postProgress = async () => {
+              const payload = {
+                progress: updatedProgress,
+              };
+              await axios
+                .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
+                  headers: {
+                    Authorization: `Bearer ${user.token}`,
+                  },
+                })
+                .then((res) => {
+                  console.log(res);
+                  setNotifying(false);
+                  handlers.mutateUser({
+                    progress: updatedProgress,
+                  });
+                })
+                .catch((err) => {
+                  console.log(err);
+                  console.log("Error -- Problem with updating notification value");
+                });
+            };
+            postProgress();
+          })
+          .catch((err) => {
+            console.log(err);
+            toast.error("Something went wrong! Please try again");
+            setNotifying(false);
+          });
+      };
+      notifyProgressEmail();
     }
   };
 
@@ -618,11 +680,28 @@ const Segment = ({
                                   You have successfully completed {parentTrackTitle}. Please click
                                   the button below to notify your Account Manager.
                                 </p>
-                                <div className="mt-4">
-                                  <Button variant="primary" type="button">
-                                    Complete this track
-                                  </Button>
-                                </div>
+                                {user && progressIndexOfActiveTrack !== null && (
+                                  <div className="mt-4">
+                                    {user.progress[progressIndexOfActiveTrack]
+                                      ?.trackCompletedAndNotified ? (
+                                      <Button
+                                        className="THEME__button-disabled"
+                                        variant={"primary"}
+                                      >
+                                        Notification Sent.
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        isLoading={notifying}
+                                        onClick={() => completeTrack()}
+                                        variant="primary"
+                                        type="button"
+                                      >
+                                        Complete this track
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>

@@ -11,6 +11,7 @@ const Button = ({
   destination,
   pageRefresh,
   isLoading,
+  onClick,
 }) => {
   return (
     <>
@@ -33,6 +34,7 @@ const Button = ({
       ) : (
         <div className={`MODULE__button ${wrapperClassName}`}>
           <button
+            onClick={onClick}
             type={type}
             className={`THEME__button THEME__button-${variant} ${className} ${
               isLoading &&
