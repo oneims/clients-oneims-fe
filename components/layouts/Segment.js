@@ -104,7 +104,7 @@ const Segment = ({
       const notifyProgressEmail = async () => {
         setNotifying(true);
         const payload = {
-          toEmailAddress: "parasbokhari@gmail.com",
+          toEmailAddress: "pbokhari@oneims.com",
           subject: "User Progress Submitted - OneIMS Clients",
           dynamicTemplateData: {
             userFirstName: user.firstName,
