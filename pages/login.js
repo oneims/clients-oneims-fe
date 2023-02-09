@@ -40,7 +40,7 @@ const Login = () => {
         .then(sleeper(500))
         .then((res) => {
           console.log(res);
-          setSuccessMessage(`We just emailed you a login link. Please login using that link.`);
+          setSuccessMessage(`We emailed you a login link. Please login using that link.`);
           setLoginUser((prevState) => ({ ...prevState, isLoading: false }));
           reset();
         })
