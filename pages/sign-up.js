@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "@/components/core/Form";
 import Section from "@/components/wrappers/Section";
 import { useForm } from "react-hook-form";
@@ -7,6 +7,7 @@ import axios from "axios";
 import { setCookie } from "nookies";
 import { sleeper } from "@/lib/Helpers";
 import ProtectedRoute from "@/lib/ProtectedRoute";
+import { useRouter } from "next/router";
 
 const CreateAccount = () => {
   const {
@@ -25,6 +26,11 @@ const CreateAccount = () => {
   });
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+
+  const router = useRouter();
+  useEffect(() => {
+    router.push(`/login`);
+  }, []);
 
   const onSubmit = (data) => {
     setNewUser((prevState) => ({ ...prevState, isLoading: true }));
@@ -77,7 +83,7 @@ const CreateAccount = () => {
 
   return (
     <>
-      <ProtectedRoute type="login">
+      {/* <ProtectedRoute type="login">
         <main>
           <Section>
             <div className="container">
@@ -116,7 +122,7 @@ const CreateAccount = () => {
             </div>
           </Section>
         </main>
-      </ProtectedRoute>
+      </ProtectedRoute> */}
     </>
   );
 };

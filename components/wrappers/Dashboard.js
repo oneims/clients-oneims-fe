@@ -14,6 +14,7 @@ const Dashboard = ({ children, segmentView }) => {
             isLoggedIn={user?.isLoggedIn}
             firstName={user?.firstName}
             lastName={user?.lastName}
+            email={user?.email}
           />
           <Main>{children}</Main>
           <Footer />
@@ -24,6 +25,7 @@ const Dashboard = ({ children, segmentView }) => {
             isLoggedIn={user?.isLoggedIn}
             firstName={user?.firstName}
             lastName={user?.lastName}
+            email={user?.email}
           />
           <Main style={{ minHeight: "100vh" }}>{children}</Main>
           <Footer />

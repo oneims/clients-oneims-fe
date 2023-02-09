@@ -107,9 +107,7 @@ const Segment = ({
           toEmailAddress: "pbokhari@oneims.com",
           subject: "User Progress Submitted - OneIMS Clients",
           dynamicTemplateData: {
-            userFirstName: user.firstName,
-            userLastName: user.lastName,
-            userCompanyName: user.company,
+            userEmail: user.email,
             trackName: parentTrackTitle,
             userProgressDestination: `${Schema__Generic_Variables.domain}/users/${user.id}`,
           },
@@ -675,7 +673,7 @@ const Segment = ({
                                 </div>
                               </div>
                               <div className="col-lg-10 mt-3 ps-lg-4">
-                                <h2 className="h4 THEME__f-600">Awesome, {user?.firstName}!</h2>
+                                <h2 className="h4 THEME__f-600">Awesome!</h2>
                                 <p>
                                   You have successfully completed {parentTrackTitle}. Please click
                                   the button below to notify your Account Manager.
@@ -688,7 +686,7 @@ const Segment = ({
                                         className="THEME__button-disabled"
                                         variant={"primary"}
                                       >
-                                        Notification Sent.
+                                        Notification Sent
                                       </Button>
                                     ) : (
                                       <Button

@@ -4,6 +4,7 @@ import ProtectedRoute from "@/lib/ProtectedRoute";
 import Segment from "@/components/layouts/Segment";
 import { useOnboardingNavigationBySlugGET } from "@/lib/Fetcher";
 import { useRouter } from "next/router";
+import { NextSeo } from "next-seo";
 
 const SegmentPage = () => {
   const { user } = useAppContext();
@@ -47,6 +48,13 @@ const SegmentPage = () => {
 
   return (
     <>
+      <NextSeo
+        title={`${
+          segmentTitle && parentTrackTitle
+            ? `${segmentTitle} | ${parentTrackTitle}`
+            : `Onboarding Segment`
+        } | Clients OneIMS`}
+      />
       <ProtectedRoute>
         {segmentSlug !== `complete` ? (
           <Segment

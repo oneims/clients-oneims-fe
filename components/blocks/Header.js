@@ -3,7 +3,7 @@ import Container from "@/components/wrappers/Container";
 import { useAppContext } from "@/context/AppWrapper";
 import { Schema__Generic_Variables } from "@/lib/Schema";
 
-const Header = ({ firstName, lastName, isLoggedIn }) => {
+const Header = ({ firstName, lastName, email, isLoggedIn }) => {
   const { handlers } = useAppContext();
   return (
     <>
@@ -19,7 +19,7 @@ const Header = ({ firstName, lastName, isLoggedIn }) => {
               <div className="BLOCK__app-header__info-wrapper">
                 <div className="THEME__text-inverted THEME__font-size-0n9">
                   <span className="THEME__f-600 MODULE__signed-in-as">
-                    Signed in as {firstName} {lastName}{" "}
+                    Signed in as {email}{" "}
                     <span className="THEME__f-400">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                   </span>
                   <span onClick={() => handlers.handleLogout()} className="THEME__cursor-pointer">

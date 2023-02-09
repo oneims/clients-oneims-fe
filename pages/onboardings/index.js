@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { useOnboardingsGET } from "@/lib/Fetcher";
 import { useAppContext } from "@/context/AppWrapper";
 import Spinner from "@/components/core/Spinner";
+import { NextSeo } from "next-seo";
 
 const OnboardingsIndex = () => {
   const { user } = useAppContext();
@@ -19,6 +20,7 @@ const OnboardingsIndex = () => {
   }
   return (
     <>
+      <NextSeo title="Onboardings | Clients OneIMS" />
       <ProtectedRoute>
         <Dashboard>
           <Section className="THEME__bg-primary BLOCK__default">

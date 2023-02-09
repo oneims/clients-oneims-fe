@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import Section from "@/components/wrappers/Section";
 import Form from "@/components/core/Form";
 import { useForm } from "react-hook-form";
-import { Schema__Form__Login, Schema__Generic_Variables } from "@/lib/Schema";
+import { Schema__Form__Login } from "@/lib/Schema";
 import axios from "axios";
-import { setCookie } from "nookies";
 import { sleeper } from "@/lib/Helpers";
 import ProtectedRoute from "@/lib/ProtectedRoute";
 import parse from "html-react-parser";
 import { useAppContext } from "@/context/AppWrapper";
+import { NextSeo } from "next-seo";
 
 const Login = () => {
   const { user } = useAppContext();
@@ -27,45 +27,29 @@ const Login = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const onSubmit = (data) => {
     setLoginUser((prevState) => ({ ...prevState, isLoading: true }));
     const payload = {
-      identifier: data.email,
-      password: data.password,
+      email: data.email,
     };
     const postPayload = async () => {
       await axios
-        .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/local`, payload)
+        .post(`${process.env.NEXT_PUBLIC_API_URL}/passwordless/send-link`, payload)
         .then(sleeper(500))
         .then((res) => {
           console.log(res);
-          const jwt = res.data.jwt;
-          const id = res.data.user.id;
-          setLoginUser((prevState) => ({
-            ...prevState,
-            response: res.data.data,
-            isLoading: true,
-          }));
-          setCookie({ res }, "token", jwt, {
-            secure: process.env.NODE_ENV !== "development",
-            maxAge: 60 * 60 * 24 * 7,
-            path: "/",
-          });
-          setCookie({ res }, "id", id, {
-            secure: process.env.NODE_ENV !== "development",
-            maxAge: 60 * 60 * 24 * 7,
-            path: "/",
-          });
-          location.replace(`${Schema__Generic_Variables.loginSuccessUrl}`);
-          // reset();
+          setSuccessMessage(`We just emailed you a login link. Please login using that link.`);
+          setLoginUser((prevState) => ({ ...prevState, isLoading: false }));
+          reset();
         })
         .catch((err) => {
           console.log(err);
           if (err.response) {
-            setErrorMessage(err.response.data.error.message);
+            setErrorMessage(`Oops. Something went wrong.`);
+            setLoginUser((prevState) => ({ ...prevState, isLoading: false }));
           }
-          setLoginUser((prevState) => ({ ...prevState, isError: true, isLoading: false }));
         });
     };
     postPayload();
@@ -73,6 +57,7 @@ const Login = () => {
 
   return (
     <>
+      <NextSeo title="Login | Clients OneIMS" />
       <ProtectedRoute type="login">
         {!user.isLoading && (
           <main>
@@ -86,7 +71,7 @@ const Login = () => {
                       </div>
                       <div className="MODULE__auth-box__helper-wrapper mb-4 pb-3">
                         <span className="THEME__font-size-0n9">
-                          {parse(`Don't have an account? <a href="/sign-up">Sign up</a>`)}
+                          {parse(`Enter your email address to get started`)}
                         </span>
                       </div>
                     </div>
@@ -100,6 +85,7 @@ const Login = () => {
                         isValid={isValid}
                         isLoading={loginUser.isLoading}
                         errorMessage={errorMessage}
+                        successMessage={successMessage}
                       />
                     </div>
                   </div>
