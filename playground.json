@@ -9,7 +9,7 @@
     {
       "group": [
         {
-          "name": "123333_sample_question_one",
+          "name": "sample_question_one",
           "type": "text",
           "label": "Sample Question One",
           "element": "input",
@@ -79,11 +79,15 @@
       ]
     },
     {
-      "group": [
+      "name": "repeater_test",
+      "title": "Title for Repeater",
+      "element": "repeater",
+      "description": "Please click the 'Add' button below to add items",
+      "repeaterElements": [
         {
-          "name": "123sdad_sample_question_five",
+          "name": "sample_repeater_field_one",
           "type": "text",
-          "label": "Sample Question Five",
+          "label": "Sample Repeater Field One",
           "element": "input",
           "validations": {
             "pattern": {
@@ -97,15 +101,45 @@
           }
         },
         {
-          "name": "123dasda_sample_question_six",
+          "name": "sample_repeater_field_two",
           "type": "text",
-          "label": "Sample Question Six",
+          "label": "Sample Repeater Field Two",
           "element": "input",
           "validations": {
             "pattern": {
               "value": "/^S*$/",
               "message": "Must only be characters"
             },
+            "required": {
+              "value": true,
+              "message": "Please complete this required field"
+            }
+          }
+        },
+        {
+          "name": "sample_repeater_field_three",
+          "type": "text",
+          "label": "Sample Repeater Field Three",
+          "element": "select",
+          "options": [
+            {
+              "name": "option_1",
+              "label": "Option 1"
+            },
+            {
+              "name": "option_2",
+              "label": "Option 2"
+            },
+            {
+              "name": "option_3",
+              "label": "Option 3"
+            },
+            {
+              "name": "option_4",
+              "label": "Option 4"
+            }
+          ],
+          "validations": {
             "required": {
               "value": true,
               "message": "Please complete this required field"

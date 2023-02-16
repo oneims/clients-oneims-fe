@@ -9,7 +9,7 @@ import Dashboard from "@/components/wrappers/Dashboard";
 import Spinner from "@/components/core/Spinner";
 import ReactMarkdown from "react-markdown";
 import Form from "@/components/core/Form";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Script from "next/script";
@@ -38,14 +38,19 @@ const Segment = ({
   const [wistiaLoaded, setWistiaLoaded] = useState(false);
   const [incompletedSegments, setIncompletedSegments] = useState(null);
   const [notifying, setNotifying] = useState(false);
+  const [repeaterName, setRepeaterName] = useState("");
+  // const [formKey, setFormKey] = useState(0);
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isDirty, isValid },
   } = useForm({
     mode: `all`,
   });
+
+  const { fields, append, remove } = useFieldArray({ control, name: repeaterName });
 
   const [submitForm, setSubmitForm] = useState({
     response: null,
@@ -54,6 +59,25 @@ const Segment = ({
   });
 
   let trackProgress;
+
+  const checkRepeaterName = () => {
+    if (
+      progressIndexOfActiveTrack !== null &&
+      progressIndexOfActiveSegment !== null &&
+      !isCompletePage &&
+      pageContent
+    ) {
+      let name;
+      pageContent.form.fields.forEach((elem) => {
+        if (elem.element && elem.element === `repeater`) {
+          name = elem.name;
+        }
+      });
+      if (name && name.length > 0) {
+        setRepeaterName(name);
+      }
+    }
+  };
 
   const onSubmit = (data) => {
     if (user.progress) {
@@ -427,6 +451,7 @@ const Segment = ({
     updateIndexOfActiveTrackAndSegment();
     reset();
     checkWistiaLoaded(pageContent?.videoId);
+    checkRepeaterName();
   }, [asPath]);
 
   useEffect(() => {
@@ -436,6 +461,10 @@ const Segment = ({
   useEffect(() => {
     updateIndexOfActiveTrackAndSegment();
   }, [trackAlreadyInProgress]);
+
+  useEffect(() => {
+    reset();
+  }, [repeaterName]);
 
   useEffect(() => {
     syncTrackWithProgress();
@@ -454,6 +483,7 @@ const Segment = ({
     }
     checkWistiaLoaded(pageContent?.videoId);
     getListOfIncompletedSegments();
+    checkRepeaterName();
   }, [user, progressIndexOfActiveTrack, progressIndexOfActiveSegment]);
 
   return (
@@ -617,6 +647,10 @@ const Segment = ({
                             isDirty={isDirty}
                             isValid={isValid}
                             isLoading={submitForm.isLoading}
+                            fields={fields}
+                            control={control}
+                            append={append}
+                            remove={remove}
                           />
                         </div>
                       )}

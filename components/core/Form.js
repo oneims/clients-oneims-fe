@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "@/components/core/Button";
-import { Input } from "@/components/core/FormElements";
+import { Input, Repeater } from "@/components/core/FormElements";
 
 const Form = ({
   onSubmit,
@@ -12,6 +12,10 @@ const Form = ({
   isLoading,
   errorMessage,
   successMessage,
+  fields,
+  control,
+  append,
+  remove,
 }) => {
   return (
     <>
@@ -59,6 +63,80 @@ const Form = ({
                         register={register}
                         errors={errors}
                       />
+                    </>
+                  )}
+                  {elem.element === `repeater` && (
+                    <>
+                      {elem.title && (
+                        <div className="mb-3 mt-5">
+                          <span className="d-block THEME__f-700">{elem.title}</span>
+                          {elem.description && <span className="">{elem.description}</span>}
+                          {fields.length > 0 && (
+                            <span className="d-block THEME__font-size-0n8 THEME__f-600">
+                              {fields.length === 1
+                                ? `${fields.length} item added`
+                                : `${fields.length} items added`}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {fields.map((elem2, index2) => {
+                        return (
+                          <div key={elem2.id} className="mt-3 MODULE__repeater-field">
+                            <div className="MODULE__repeater-field__delete-wrapper">
+                              <figure
+                                className="MODULE__repeater-field__delete"
+                                onClick={() => remove(index2)}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="w-6 h-6"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                                  />
+                                </svg>
+                              </figure>
+                            </div>
+                            <div className="MODULE__repeater-field__wrapper">
+                              <Repeater
+                                id={elem2.id}
+                                repeaterIndex={index2}
+                                repeaterElements={elem.repeaterElements}
+                                repeaterName={elem.name}
+                                register={register}
+                                errors={errors}
+                                control={control}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="text-end mt-3">
+                        <div className="MODULE__repeater-field__add">
+                          <Button
+                            className="THEME__font-size-0n8"
+                            onClick={() => {
+                              const repeaterFields = elem.repeaterElements;
+                              const obj = {};
+                              repeaterFields.forEach((elem2) => {
+                                const name = elem2.name;
+                                obj[name] = "";
+                              });
+                              append(obj);
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </div>
                     </>
                   )}
                 </div>
