@@ -1270,6 +1270,13 @@
         border: 1px solid #6dc7bd;
         border-radius: 4px;
       }
+      &-alert {
+        background-color: var(--theme_alert);
+        padding: 0.7rem;
+        border: 1px solid var(--theme_alert);
+        border-radius: 4px;
+        color: #fff;
+      }
     }
     .MODULE {
       &__select {
@@ -1485,6 +1492,14 @@
         height: 20px;
       }
     }
+  }
+  &__organization-label {
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--theme_border-color);
+    margin-left: 0.25rem;
+    border-radius: 4px;
+    font-weight: 400;
+    font-size: 0.85rem;
   }
   // New Modules Here
 }

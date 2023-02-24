@@ -16,7 +16,7 @@ export function AppWrapper({ children }) {
     checkAuth: async () => {
       let token;
       const cookies = parseCookies();
-      const params = ``;
+      const params = `?populate=*`;
       if (!cookies.token || user.isLoggedIn) {
         setUser((prevState) => ({ ...prevState, isLoading: false }));
         return null;
@@ -37,6 +37,7 @@ export function AppWrapper({ children }) {
             isLoggedIn: true,
             isLoading: false,
           }));
+          // console.log("RES", res);
           return res;
         })
         .catch((err) => {

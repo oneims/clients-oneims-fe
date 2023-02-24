@@ -14,7 +14,7 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Script from "next/script";
 import Button from "../core/Button";
-import { compareKeys } from "@/lib/Helpers";
+import { compareKeys, sortASCInteger } from "@/lib/Helpers";
 import { Schema__Generic_Variables } from "@/lib/Schema";
 
 const Segment = ({
@@ -58,6 +58,8 @@ const Segment = ({
     isError: null,
   });
 
+  // console.log(`USER: `, user);
+
   let trackProgress;
 
   const checkRepeaterName = () => {
@@ -80,8 +82,10 @@ const Segment = ({
   };
 
   const onSubmit = (data) => {
-    if (user.progress) {
-      const { progress } = user;
+    if (user.organization) {
+      const { organization } = user;
+      const { progress } = organization;
+      console.log(`ORGANIZAtion`, organization);
       let updatedProgress = JSON.parse(JSON.stringify(progress));
       updatedProgress[progressIndexOfActiveTrack].segments[
         progressIndexOfActiveSegment
@@ -99,17 +103,24 @@ const Segment = ({
           progress: updatedProgress,
         };
         await axios
-          .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          })
+          .put(
+            `${process.env.NEXT_PUBLIC_API_URL}/organizations/${organization.id}`,
+            { data: payload },
+            {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+            }
+          )
           .then((res) => {
             toast.success("Progress saved successfully!");
             console.log(res);
             setSubmitForm((prevState) => ({ ...prevState, isLoading: false }));
             handlers.mutateUser({
-              progress: updatedProgress,
+              organization: {
+                ...user.organization,
+                progress: updatedProgress,
+              },
             });
           })
           .catch((err) => {
@@ -123,8 +134,9 @@ const Segment = ({
   };
 
   const completeTrack = () => {
-    if (user && user.progress) {
-      let updatedProgress = JSON.parse(JSON.stringify(user.progress));
+    if (user && user.organization && user.organization.progress) {
+      const { organization } = user;
+      let updatedProgress = JSON.parse(JSON.stringify(organization.progress));
       const notifyProgressEmail = async () => {
         setNotifying(true);
         const payload = {
@@ -133,15 +145,19 @@ const Segment = ({
           dynamicTemplateData: {
             userEmail: user.email,
             trackName: parentTrackTitle,
-            userProgressDestination: `${Schema__Generic_Variables.domain}/users/${user.id}`,
+            userProgressDestination: `${Schema__Generic_Variables.domain}/organization/${organization.id}`,
           },
         };
         await axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/trigger-email/notify-user-progress`, payload, {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          })
+          .post(
+            `${process.env.NEXT_PUBLIC_API_URL}/trigger-email/notify-user-progress`,
+            { data: payload },
+            {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+            }
+          )
           .then((res) => {
             toast.success("Notification sent!");
             console.log(res);
@@ -151,16 +167,26 @@ const Segment = ({
                 progress: updatedProgress,
               };
               await axios
-                .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
-                  headers: {
-                    Authorization: `Bearer ${user.token}`,
-                  },
-                })
+                .put(
+                  `${process.env.NEXT_PUBLIC_API_URL}/organizations/${organization.id}`,
+                  { data: payload },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${user.token}`,
+                    },
+                  }
+                )
                 .then((res) => {
                   console.log(res);
                   setNotifying(false);
+                  // handlers.mutateUser({
+                  //   progress: updatedProgress,
+                  // });
                   handlers.mutateUser({
-                    progress: updatedProgress,
+                    organization: {
+                      ...user.organization,
+                      progress: updatedProgress,
+                    },
                   });
                 })
                 .catch((err) => {
@@ -187,14 +213,18 @@ const Segment = ({
       !isCompletePage &&
       user
     ) {
-      const progress = user.progress;
+      const { organization } = user;
+      const progress = organization.progress;
       const progressSegmentsInCurrentTrack = progress[progressIndexOfActiveTrack].segments;
       const progressSegmentsInCurrentTrackIds = progressSegmentsInCurrentTrack.map(
         (elem) => elem.id
       );
       const navigationIds = navigation.map((elem) => elem.id);
       console.log(progressSegmentsInCurrentTrackIds, navigationIds);
-      if (JSON.stringify(progressSegmentsInCurrentTrackIds) !== JSON.stringify(navigationIds)) {
+      if (
+        JSON.stringify(sortASCInteger(progressSegmentsInCurrentTrackIds)) !==
+        JSON.stringify(sortASCInteger(navigationIds))
+      ) {
         let updatedProgress = JSON.parse(JSON.stringify(progress));
         let updatedSegments = [...progressSegmentsInCurrentTrack];
         let segmentsNotInProgress = navigation.filter((elem) => {
@@ -248,16 +278,26 @@ const Segment = ({
             progress: updatedProgress,
           };
           await axios
-            .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
-              headers: {
-                Authorization: `Bearer ${user.token}`,
-              },
-            })
+            .put(
+              `${process.env.NEXT_PUBLIC_API_URL}/organizations/${organization.id}`,
+              { data: payload },
+              {
+                headers: {
+                  Authorization: `Bearer ${user.token}`,
+                },
+              }
+            )
             .then((res) => {
               console.log(res);
               console.log("Synced track updates");
+              // handlers.mutateUser({
+              //   progress: updatedProgress,
+              // });
               handlers.mutateUser({
-                progress: updatedProgress,
+                organization: {
+                  ...user.organization,
+                  progress: updatedProgress,
+                },
               });
             })
             .catch((err) => {
@@ -277,7 +317,8 @@ const Segment = ({
       !isCompletePage &&
       user
     ) {
-      const progress = user.progress;
+      const { organization } = user;
+      const progress = organization.progress;
       const questionnaireInProgress =
         progress[progressIndexOfActiveTrack]?.segments[progressIndexOfActiveSegment]?.formFields;
       const questionnaireInSegment = {};
@@ -317,16 +358,26 @@ const Segment = ({
             progress: updatedProgress,
           };
           await axios
-            .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
-              headers: {
-                Authorization: `Bearer ${user.token}`,
-              },
-            })
+            .put(
+              `${process.env.NEXT_PUBLIC_API_URL}/organizations/${organization.id}`,
+              { data: payload },
+              {
+                headers: {
+                  Authorization: `Bearer ${user.token}`,
+                },
+              }
+            )
             .then((res) => {
               console.log(res);
               console.log("Synced questionnaire");
+              // handlers.mutateUser({
+              //   progress: updatedProgress,
+              // });
               handlers.mutateUser({
-                progress: updatedProgress,
+                organization: {
+                  ...user.organization,
+                  progress: updatedProgress,
+                },
               });
             })
             .catch((err) => {
@@ -340,13 +391,16 @@ const Segment = ({
   };
 
   const updateIndexOfActiveTrackAndSegment = () => {
-    if (!isLoading && !user.loading && trackAlreadyInProgress) {
-      const indexOfActiveTrack = user.progress.findIndex(
+    if (!isLoading && !user.loading && user.organization.progress && trackAlreadyInProgress) {
+      const { organization } = user;
+      const indexOfActiveTrack = organization.progress.findIndex(
         (elem) => elem.parentTrackId === parentTrackId
       );
-      const indexOfActiveSegment = user.progress[indexOfActiveTrack].segments.findIndex((elem) => {
-        return elem.id === activeSegmentId;
-      });
+      const indexOfActiveSegment = organization.progress[indexOfActiveTrack].segments.findIndex(
+        (elem) => {
+          return elem.id === activeSegmentId;
+        }
+      );
       setProgressIndexOfActiveTrack(indexOfActiveTrack);
       setProgressIndexOfActiveSegment(indexOfActiveSegment);
     }
@@ -389,23 +443,41 @@ const Segment = ({
         });
       });
       trackProgress.segments = segments;
-      let ongoingTracks = user.progress ? user.progress.map((elem) => elem.parentTrackId) : [];
+      let ongoingTracks = user.organization.progress
+        ? user.organization.progress.map((elem) => elem.parentTrackId)
+        : [];
       if (ongoingTracks.includes(parentTrackId)) {
         setTrackAlreadyInProgress(true);
       } else {
         const postProgress = async () => {
           const payload = {
-            progress: user.progress ? [...user.progress, trackProgress] : [trackProgress],
+            progress: user.organization.progress
+              ? [...user.organization.progress, trackProgress]
+              : [trackProgress],
           };
           await axios
-            .put(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, payload, {
-              headers: {
-                Authorization: `Bearer ${user.token}`,
-              },
-            })
+            .put(
+              `${process.env.NEXT_PUBLIC_API_URL}/organizations/${user.organization.id}`,
+              { data: payload },
+              {
+                headers: {
+                  Authorization: `Bearer ${user.token}`,
+                },
+              }
+            )
             .then((res) => {
+              // handlers.mutateUser({
+              //   progress: user.organization.progress
+              //     ? [...user.organization.progress, trackProgress]
+              //     : [trackProgress],
+              // });
               handlers.mutateUser({
-                progress: user.progress ? [...user.progress, trackProgress] : [trackProgress],
+                organization: {
+                  ...user.organization,
+                  progress: user.organization.progress
+                    ? [...user.organization.progress, trackProgress]
+                    : [trackProgress],
+                },
               });
               setTrackAlreadyInProgress(true);
               console.log(res);
@@ -438,7 +510,8 @@ const Segment = ({
 
   const getListOfIncompletedSegments = () => {
     if (progressIndexOfActiveTrack !== null) {
-      const completedSegments = user.progress[progressIndexOfActiveTrack]?.segmentsCompleted;
+      const completedSegments =
+        user.organization.progress[progressIndexOfActiveTrack]?.segmentsCompleted;
       const incompletedSegments = navigation.filter((elem) => {
         return completedSegments.length > 0 ? !completedSegments.includes(elem.id) : navigation;
       });
@@ -471,14 +544,16 @@ const Segment = ({
     syncQuestionnaireWithProgress();
     if (
       user &&
-      user.progress &&
+      user.organization &&
+      user.organization.progress &&
       progressIndexOfActiveTrack !== null &&
       progressIndexOfActiveSegment !== null &&
       !isCompletePage
     ) {
       reset(
-        user.progress[progressIndexOfActiveTrack]?.segments[progressIndexOfActiveSegment]
-          ?.formFields
+        user.organization.progress[progressIndexOfActiveTrack]?.segments[
+          progressIndexOfActiveSegment
+        ]?.formFields
       );
     }
     checkWistiaLoaded(pageContent?.videoId);
@@ -549,7 +624,7 @@ const Segment = ({
                                     className={`MODULE__segment-sidebar__item__progress-circle ${
                                       user &&
                                       progressIndexOfActiveTrack !== null &&
-                                      user.progress[
+                                      user.organization.progress[
                                         progressIndexOfActiveTrack
                                       ]?.segmentsCompleted.includes(elem.id) &&
                                       "MODULE__segment-sidebar__item__progress-circle-completed"
@@ -714,7 +789,7 @@ const Segment = ({
                                 </p>
                                 {user && progressIndexOfActiveTrack !== null && (
                                   <div className="mt-4">
-                                    {user.progress[progressIndexOfActiveTrack]
+                                    {user.organization.progress[progressIndexOfActiveTrack]
                                       ?.trackCompletedAndNotified ? (
                                       <Button
                                         className="THEME__button-disabled"
