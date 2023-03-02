@@ -6,7 +6,10 @@ const Spinner = (props) => {
       <div
         className={`MODULE__spinner ${props.button ? `MODULE__spinner-button ms-3` : ``} ${
           props.white ? `MODULE__spinner-white` : ``
-        } ${props.xs ? `MODULE__spinner-xs` : ``}`}
+        } ${props.xs ? `MODULE__spinner-xs` : ``} 
+        ${props.table ? `MODULE__spinner-table` : ``}
+        
+        `}
       >
         <div className="showbox">
           <div className="loader">

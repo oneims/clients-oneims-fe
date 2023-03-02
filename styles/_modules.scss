@@ -1203,6 +1203,13 @@
         width: 15px;
       }
     }
+    &-table {
+      padding-left: 1.5rem;
+      .loader {
+        width: 24px;
+        margin-left: 0;
+      }
+    }
   }
   &__form {
     input {
@@ -1452,6 +1459,55 @@
     .table {
       border: 1px solid var(--theme_border-color);
       border-radius: var(--theme_card-border-radius);
+    }
+  }
+  &__table {
+    &-v2 {
+      margin-bottom: 0;
+      &__wrapper {
+        border: 1px solid var(--theme_border-color);
+        border-radius: 16px;
+      }
+      thead {
+        border-bottom: 1px solid var(--theme_border-color);
+        tr {
+          th {
+            font-weight: 500;
+            border-bottom: none;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+        }
+      }
+      tbody {
+        tr {
+          border-bottom: 1px solid var(--theme_border-color);
+          td {
+            border-bottom: none;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+      &__chev-down,
+      &__chev-up {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        cursor: pointer;
+        color: var(--theme_body-color_LIGHT);
+        svg {
+          width: 25px;
+          height: 25px;
+        }
+      }
+      &__nested-wrapper {
+        background-color: var(--theme_app-bg-light);
+      }
     }
   }
   &__repeater-field {

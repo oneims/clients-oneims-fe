@@ -49,6 +49,13 @@
         background-color: var(--theme_tertiary-color_HOVER);
       }
     }
+    &-ghost-bw {
+      background-color: transparent;
+      border: 1px solid var(--theme_border-color);
+      &:hover {
+        background-color: #eee;
+      }
+    }
     &-link {
       padding: 0 !important;
       background: transparent;
@@ -134,6 +141,12 @@
   }
   &__text-primary {
     color: var(--theme_primary-color) !important;
+  }
+  &__text-app-dark {
+    color: var(--theme_app-bg-dark) !important;
+  }
+  &__text-light {
+    color: #848c9a !important;
   }
   &__bg-primary {
     background-color: var(--theme_primary-color) !important;
