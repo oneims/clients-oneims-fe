@@ -10,12 +10,14 @@ import {
   fetchFromAxios,
   useFindOrganizationByBasecampIdGET,
 } from "@/lib/Fetcher";
+import axios from "axios";
 import { useAppContext } from "@/context/AppWrapper";
 import { NextSeo } from "next-seo";
 import { useRouter } from "next/router";
 import SimpleTable from "@/components/core/SimpleTable";
 import Button from "@/components/core/Button";
 import ProtectedRoute from "@/lib/ProtectedRoute";
+import toast, { Toaster } from "react-hot-toast";
 
 const BasecampProjectsSingle = () => {
   const router = useRouter();
@@ -67,6 +69,29 @@ const BasecampProjectsSingle = () => {
   });
   const [syncStatusCounter, setSyncStatusCounter] = useState(0);
   const [organizationIsSynced, setOrganizationIsSynced] = useState(false);
+  const [organizationInternalId, setOrganizationInternalId] = useState(null);
+  const [organizationAndUsersSyncInProgress, setOrganizationAndUsersSyncInProgress] =
+    useState(false);
+
+  const [listOfNotSyncedUsers, setListOfNotSyncedUsers] = useState(null);
+
+  const [createOrganization, setCreateOrganization] = useState({
+    response: null,
+    isLoading: false,
+    isError: null,
+  });
+
+  const [createUsers, setCreateUsers] = useState({
+    response: null,
+    isLoading: false,
+    isError: null,
+  });
+
+  const postHeaders = {
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+    },
+  };
 
   const fetchUsersStatusSync = () => {
     if (table.data && table.data.length > 0 && user) {
@@ -75,7 +100,9 @@ const BasecampProjectsSingle = () => {
       tableDataCopy.forEach((elem, index) => {
         const fetchUserByEmail = async () => {
           const response = await fetchFromAxios(
-            `${process.env.NEXT_PUBLIC_API_URL}/users?filters[$and][0][email][$eq]=${elem.email}`,
+            `${
+              process.env.NEXT_PUBLIC_API_URL
+            }/users?filters[$and][0][email][$eq]=${elem.email.toLowerCase()}`,
             user?.token
           );
           if (response.data.length > 0) {
@@ -92,31 +119,115 @@ const BasecampProjectsSingle = () => {
     }
   };
 
+  const updateSyncStatusByBasecampId = (status, userId, messageType) => {
+    const tableCopy = { ...table };
+    const tableDataCopy = [...tableCopy.data];
+    const userIndex = tableDataCopy.findIndex((elem) => elem.userId === userId);
+    if (status === `loading`) {
+      tableDataCopy[userIndex].syncStatus = (
+        <div className="loading">
+          <div className="text-center">Loading......</div>
+        </div>
+      );
+    } else {
+      tableDataCopy[userIndex].syncStatus = (
+        <span className={`THEME__text-${messageType}`}>{status}</span>
+      );
+    }
+    return tableDataCopy;
+  };
+
+  const syncUsers = (internalId) => {
+    internalId = organizationInternalId ? organizationInternalId : internalId;
+    if (table.data && internalId) {
+      let usersSynced = 0;
+      let usersErrors = 0;
+      setOrganizationAndUsersSyncInProgress(true);
+      listOfNotSyncedUsers.forEach((elem) => {
+        const { name, userId, email } = elem;
+        const payload = {
+          username: email,
+          name: name,
+          basecampId: userId.toString(),
+          email,
+          password: `${userId + userId + 9000}`,
+          organization: internalId,
+        };
+        const postPayload = async () => {
+          await axios
+            .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/local/register`, payload)
+            .then((res) => {
+              console.log(res);
+              usersSynced++;
+              const updatedSuccessTable = updateSyncStatusByBasecampId(`Synced`, userId, `success`);
+              setTable((prevState) => ({ ...prevState, data: updatedSuccessTable }));
+              const updatedListOfNotSyncedUsers = table.data.filter((elem) => {
+                return elem.syncStatus?.props?.children === `Not Synced`;
+              });
+              setListOfNotSyncedUsers(updatedListOfNotSyncedUsers);
+              if (updatedListOfNotSyncedUsers.length === 0) {
+                setOrganizationAndUsersSyncInProgress(false);
+                if (usersErrors === 0) {
+                  toast.success(`${usersSynced} user(s) created successfully`);
+                }
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+              usersErrors++;
+              if (usersSynced + usersErrors === listOfNotSyncedUsers.length) {
+                toast.error(`${usersErrors} user(s) failed. Please try again later`);
+                setOrganizationAndUsersSyncInProgress(false);
+              }
+            });
+        };
+        postPayload();
+      });
+    } else {
+      setOrganizationAndUsersSyncInProgress(false);
+      toast.error(`Something went wrong! Please try later`);
+    }
+  };
+
   const syncOrganization = () => {
-    if (organizationIsSynced) {
-      const organizationPayload = {
-        title: "",
+    if (!organizationIsSynced) {
+      if (!projectDetails) return;
+      setCreateOrganization((prevState) => ({ ...prevState, isLoading: true }));
+      setOrganizationAndUsersSyncInProgress(true);
+      const { name, id } = projectDetails;
+      const payload = {
+        title: name,
+        basecampId: id.toString(),
       };
       const postPayload = async () => {
         await axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/organizations`, payload)
-          .then(sleeper(500))
+          .post(`${process.env.NEXT_PUBLIC_API_URL}/organizations`, { data: payload }, postHeaders)
           .then((res) => {
             console.log(res);
-            setSuccessMessage(`We emailed you a login link. Please login using that link.`);
-            setLoginUser((prevState) => ({ ...prevState, isLoading: false }));
-            reset();
+            const internalId = res.data.data.id;
+            setOrganizationInternalId(internalId);
+            toast.success(`Organization ${name} created successfully!`);
+            setOrganizationIsSynced(true);
+            setCreateOrganization((prevState) => ({ ...prevState, isLoading: false }));
+            syncUsers(internalId);
           })
           .catch((err) => {
             console.log(err);
             if (err.response) {
-              setErrorMessage(`Oops. Something went wrong.`);
-              setLoginUser((prevState) => ({ ...prevState, isLoading: false }));
+              toast.error("Something went wrong! Please try again later");
+              setCreateOrganization((prevState) => ({ ...prevState, isLoading: false }));
+              setOrganizationAndUsersSyncInProgress(false);
             }
           });
       };
       postPayload();
+    } else {
+      syncUsers();
     }
+  };
+
+  const syncOrganizationAndUsers = () => {
+    syncOrganization();
   };
 
   useEffect(() => {
@@ -151,7 +262,6 @@ const BasecampProjectsSingle = () => {
   useEffect(() => {
     if (projectData) {
       setProjectDetails(projectData.data);
-      console.log(projectDetails);
     }
   }, [projectData]);
 
@@ -159,11 +269,22 @@ const BasecampProjectsSingle = () => {
     if (organizationData) {
       if (organizationData?.data?.length > 0) {
         setOrganizationIsSynced(true);
+        setOrganizationInternalId(organizationData.data[0]?.id);
       } else {
         setOrganizationIsSynced(false);
+        setOrganizationInternalId(null);
       }
     }
   }, [organizationData]);
+
+  useEffect(() => {
+    if (table.data) {
+      const missingUsers = table.data.filter((elem) => {
+        return elem.syncStatus?.props?.children === `Not Synced`;
+      });
+      setListOfNotSyncedUsers(missingUsers);
+    }
+  }, [table]);
 
   return (
     <ProtectedRoute>
@@ -223,13 +344,14 @@ const BasecampProjectsSingle = () => {
                 <div>
                   <SimpleTable options={table.options} columns={table.columns} data={table.data} />
                 </div>
-                {table.data.length > 0 && (
+                {table.data.length > 0 && listOfNotSyncedUsers?.length > 0 && (
                   <div className="mt-4 pt-3 text-center">
                     <Button
+                      isLoading={organizationAndUsersSyncInProgress}
                       variant="ghost-bw"
-                      className="THEME__font-size-0n8 py-2"
+                      className="THEME__font-size-0n8 py-2 mx-auto"
                       onClick={() => {
-                        console.log("ok");
+                        syncOrganizationAndUsers();
                       }}
                     >
                       Sync Organization
@@ -244,6 +366,7 @@ const BasecampProjectsSingle = () => {
           </Container>
         </Section>
       </Dashboard>
+      <Toaster position="top-center" reverseOrder={false} />
     </ProtectedRoute>
   );
 };

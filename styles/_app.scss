@@ -208,6 +208,23 @@ img {
   }
 }
 
+@keyframes colorBlack {
+  100%,
+  0% {
+    stroke: #000;
+  }
+  40% {
+    stroke: #000;
+  }
+  66% {
+    stroke: #000;
+  }
+  80%,
+  90% {
+    stroke: #000;
+  }
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);

@@ -55,6 +55,16 @@
       &:hover {
         background-color: #eee;
       }
+      &.pe-none {
+        opacity: 0.5 !important;
+      }
+      .MODULE {
+        &__spinner {
+          .path {
+            animation: dash 1.5s ease-in-out infinite, colorBlack 6s ease-in-out infinite !important;
+          }
+        }
+      }
     }
     &-link {
       padding: 0 !important;
