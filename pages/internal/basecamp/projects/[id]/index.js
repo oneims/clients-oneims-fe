@@ -126,7 +126,9 @@ const BasecampProjectsSingle = () => {
     if (status === `loading`) {
       tableDataCopy[userIndex].syncStatus = (
         <div className="loading">
-          <div className="text-center">Loading......</div>
+          <div className="text-center">
+            <Spinner table />
+          </div>
         </div>
       );
     } else {
@@ -145,6 +147,8 @@ const BasecampProjectsSingle = () => {
       setOrganizationAndUsersSyncInProgress(true);
       listOfNotSyncedUsers.forEach((elem) => {
         const { name, userId, email } = elem;
+        const updatedLoadingTable = updateSyncStatusByBasecampId(`loading`, userId, `loading`);
+        setTable((prevState) => ({ ...prevState, data: updatedLoadingTable }));
         const payload = {
           username: email,
           name: name,
@@ -162,7 +166,10 @@ const BasecampProjectsSingle = () => {
               const updatedSuccessTable = updateSyncStatusByBasecampId(`Synced`, userId, `success`);
               setTable((prevState) => ({ ...prevState, data: updatedSuccessTable }));
               const updatedListOfNotSyncedUsers = table.data.filter((elem) => {
-                return elem.syncStatus?.props?.children === `Not Synced`;
+                return (
+                  elem.syncStatus?.props?.children !== `Synced` &&
+                  elem.syncStatus?.props?.className !== `loading`
+                );
               });
               setListOfNotSyncedUsers(updatedListOfNotSyncedUsers);
               if (updatedListOfNotSyncedUsers.length === 0) {
@@ -239,11 +246,11 @@ const BasecampProjectsSingle = () => {
           userId: elem.id,
           email: elem.email_address,
           syncStatus: (
-            <>
+            <div className="loading">
               <div className="text-center">
                 <Spinner table />
               </div>
-            </>
+            </div>
           ),
         };
       });
@@ -280,7 +287,10 @@ const BasecampProjectsSingle = () => {
   useEffect(() => {
     if (table.data) {
       const missingUsers = table.data.filter((elem) => {
-        return elem.syncStatus?.props?.children === `Not Synced`;
+        return (
+          elem.syncStatus?.props?.children !== `Synced` &&
+          elem.syncStatus?.props?.className !== `loading`
+        );
       });
       setListOfNotSyncedUsers(missingUsers);
     }
