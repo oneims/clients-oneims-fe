@@ -156,7 +156,7 @@ const BasecampProjectsSingle = () => {
           email,
           password: `${userId + userId + 9000}`,
           organization: internalId,
-          client: true,
+          client: "true",
         };
         const postPayload = async () => {
           await axios
