@@ -125,7 +125,7 @@ const BasecampProjectsSingle = () => {
     const userIndex = tableDataCopy.findIndex((elem) => elem.userId === userId);
     if (status === `loading`) {
       tableDataCopy[userIndex].syncStatus = (
-        <div className="loading">
+        <div className="loading-before-update">
           <div className="text-center">
             <Spinner table />
           </div>
@@ -293,6 +293,7 @@ const BasecampProjectsSingle = () => {
         );
       });
       setListOfNotSyncedUsers(missingUsers);
+      console.log(missingUsers);
     }
   }, [table]);
 
